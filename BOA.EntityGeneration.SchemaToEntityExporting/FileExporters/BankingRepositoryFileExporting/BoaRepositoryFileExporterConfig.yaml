@@ -1,0 +1,312 @@
+OutputFilePath: $(RepositoryProjectDirectory)Boa.cs
+ClassNamePattern: $(CamelCasedTableName)
+SharedRepositoryClassAccessPath: Shared.$(CamelCasedTableName)
+ExtraAssemblyReferences:
+  - <Reference Include="BOA.Common"><HintPath>D:\BOA\Server\bin\BOA.Common.dll</HintPath></Reference>
+  - <Reference Include="BOA.Base">  <HintPath>D:\BOA\Server\bin\BOA.Base.dll  </HintPath></Reference>
+UsingLines:
+  - using System;
+  - using System.Data;
+  - using System.Data.SqlClient;
+  - using System.Collections.Generic;
+  - using BOA.Base;
+  - using BOA.Base.Data;
+  - using System.Text;
+  - using BOA.Common.Types;
+  - using $(EntityNamespace);
+  - using $(RepositoryNamespace).Shared;
+SchemaSpecificUsingLines:
+  BKM:
+    - using TransactionLogContract = BOA.Types.Kernel.Card.BKM.TransactionLogContract;
+  BNS:
+    - using TransactionLogContract = BOA.Types.Kernel.Card.BNS.TransactionLogContract;
+  POS:
+    - using TransactionLogContract = BOA.Types.Kernel.Card.POS.TransactionLogContract;
+  PRM:
+    - using BoaUserContract = BOA.Types.Kernel.Card.PRM.BoaUserContract;
+  SYSOP:
+    - using TransactionLogContract = BOA.Types.Kernel.Card.SYSOP.TransactionLogContract;
+
+DefaultValuesForInsertMethod:
+  contractInstanceName:
+  contractInstancePropertyName:  
+  ROW_GUID: $(contractInstanceName).$(contractInstancePropertyName) = Guid.NewGuid().ToString().ToUpper(new System.Globalization.CultureInfo("en-US", false));
+  INSERT_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  SystemDate: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  SYSTEM_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  INSERT_USER_ID: $(contractInstanceName).$(contractInstancePropertyName) = Context.ApplicationContext.Authentication.UserName;
+  UserName: $(contractInstanceName).$(contractInstancePropertyName) = Context.ApplicationContext.Authentication.UserName;
+  USER_NAME: $(contractInstanceName).$(contractInstancePropertyName) = Context.ApplicationContext.Authentication.UserName;
+  'string:INSERT_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = Context.EngineContext.MainBusinessKey.ToString();
+  'decimal:INSERT_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = decimal.ToInt32(Context.EngineContext.MainBusinessKey);
+DefaultValuesForUpdateByKeyMethod:
+  contractInstanceName:
+  contractInstancePropertyName:  
+  UPDATE_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  UpdateSystemDate: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  UPDATE_SYSTEM_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  UPDATE_USER_ID: $(contractInstanceName).$(contractInstancePropertyName) = Context.ApplicationContext.Authentication.UserName;
+  UpdateUserName: $(contractInstanceName).$(contractInstancePropertyName) = Context.ApplicationContext.Authentication.UserName;
+  UPDATE_USER_NAME: $(contractInstanceName).$(contractInstancePropertyName) = Context.ApplicationContext.Authentication.UserName;
+  'string:UPDATE_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = Context.EngineContext.MainBusinessKey.ToString();
+  'decimal:UPDATE_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = decimal.ToInt32(Context.EngineContext.MainBusinessKey);
+ExcludedColumnNamesWhenInsertOperation:
+  - UPDATE_DATE
+  - UPDATE_SYSTEM_DATE
+  - UPDATE_USER_ID
+  - UPDATE_TOKEN_ID
+  - UPDATE_USER_NAME
+  - UpdateUserName
+  - UpdateHostName
+  - UpdateHostIP
+  - UpdateSystemDate
+EmbeddedCodes: |
+  /// <summary>
+  ///     The object helper SQL utility
+  /// </summary>
+  static class ObjectHelperSqlUtil
+  {
+      #region Public Methods
+      public static GenericResponse<int> ContractCannotBeNull(this ObjectHelper objectHelper, string callerMemberPath)
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<int>(callerMemberPath);
+  
+          const string errorMessage = "'contract' parameter cannot be null.";
+  
+          returnObject.Results.Add(new Result {ErrorMessage = errorMessage});
+  
+          return returnObject;
+      }
+
+      /// <summary>
+      ///     Executes bulk insert.
+      /// </summary>
+      public static ResponseBase ExecuteBulkInsert(this ObjectHelper objectHelper, string methodFullPath, DataTable dt)
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<int>(methodFullPath);
+          	   
+          var dbLayer = objectHelper.Context.DBLayer;
+          	   
+          var bulkCopy = dbLayer.GetSqlBulkCopy(Databases.BOACard, dt.TableName, SqlBulkCopyOptions.Default);
+
+          foreach (DataColumn column in dt.Columns)
+          {
+              dbLayer.AddColumnMapping(bulkCopy, column.ColumnName, column.ColumnName);
+          }
+
+          var response = dbLayer.ExecuteSqlBulkCopy(bulkCopy, dt);
+          if (!response.Success)
+          {
+              returnObject.Results.AddRange(response.Results);
+              return returnObject;
+          }
+
+          return returnObject;
+      }
+
+      /// <summary>
+      ///     Gets the sequence list.
+      /// </summary>
+      public static GenericResponse<List<object>> GetSequenceList(this ObjectHelper objectHelper, string methodFullPath, string sequenceFullName, int count)
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<List<object>>(methodFullPath);
+          
+          var sb = new StringBuilder();
+                      
+          sb.AppendLine("DECLARE @temp TABLE ([Value] BIGINT)");
+          for (var i = 0; i < count; i++)
+          {
+              sb.AppendLine($"    Insert Into @temp SELECT (NEXT VALUE FOR {sequenceFullName})");
+          }
+          sb.AppendLine("SELECT [Value] FROM @temp");
+                      
+          var dbLayer = objectHelper.Context.DBLayer;
+          
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sb.ToString(), null, CommandType.Text);
+          
+          var readerResponse = dbLayer.ExecuteReader(command);
+          if (!readerResponse.Success)
+          {
+          	    returnObject.Results.AddRange(readerResponse.Results);
+          	    return returnObject;
+          }
+          
+          var reader = readerResponse.Value;
+          
+          var returnList = new List<object>();
+          
+          while (reader.Read())
+          {
+              returnList.Add(reader["Value"]);
+          }
+          
+          reader.Close();
+          
+          returnObject.Value = returnList;
+          
+          return returnObject;
+      }
+  
+      /// <summary>
+      ///     Executes the non query.
+      /// </summary>
+      public static GenericResponse<int> ExecuteNonQuery(this ObjectHelper objectHelper, string methodFullPath, SqlInfo sqlInfo)
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<int>(methodFullPath);
+  
+          var dbLayer = objectHelper.Context.DBLayer;
+  
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sqlInfo.CommandText, null, CommandType.Text);
+  
+          AddParameters(objectHelper, command, sqlInfo);
+  
+          var valueResponse = dbLayer.ExecuteNonQuery(command);
+          if (!valueResponse.Success)
+          {
+              returnObject.Results.AddRange(valueResponse.Results);
+              return returnObject;
+          }
+  
+          returnObject.Value = valueResponse.Value;
+  
+          return returnObject;
+      }
+  
+      /// <summary>
+      ///     Executes the reader to contract.
+      /// </summary>
+      public static GenericResponse<TResultContractType> ExecuteReaderToContract<TResultContractType>(this ObjectHelper objectHelper, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<TResultContractType>(methodFullPath);
+  
+          var dbLayer = objectHelper.Context.DBLayer;
+  
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sqlInfo.CommandText, null, CommandType.Text);
+  
+          AddParameters(objectHelper, command, sqlInfo);
+  
+          var readerResponse = dbLayer.ExecuteReader(command);
+          if (!readerResponse.Success)
+          {
+              returnObject.Results.AddRange(readerResponse.Results);
+              return returnObject;
+          }
+  
+          var reader = readerResponse.Value;
+  
+          var dataContract = default(TResultContractType);
+  
+          while (reader.Read())
+          {
+              dataContract = new TResultContractType();
+  
+              readContract(reader, dataContract);
+  
+              break;
+          }
+  
+          reader.Close();
+  
+          returnObject.Value = dataContract;
+  
+          return returnObject;
+      }
+  
+      /// <summary>
+      ///     Executes the reader to list.
+      /// </summary>
+      public static GenericResponse<List<TResultContractType>> ExecuteReaderToList<TResultContractType>(this ObjectHelper objectHelper, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<List<TResultContractType>>(methodFullPath);
+  
+          var dbLayer = objectHelper.Context.DBLayer;
+  
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sqlInfo.CommandText, null, CommandType.Text);
+  
+          AddParameters(objectHelper, command, sqlInfo);
+  
+          var readerResponse = dbLayer.ExecuteReader(command);
+          if (!readerResponse.Success)
+          {
+              returnObject.Results.AddRange(readerResponse.Results);
+              return returnObject;
+          }
+  
+          var reader = readerResponse.Value;
+  
+          returnObject.Value = reader.ReadToList(readContract);
+  
+          return returnObject;
+      }
+  
+      /// <summary>
+      ///     Executes the scalar.
+      /// </summary>
+      public static GenericResponse<TReturnValueType> ExecuteScalar<TReturnValueType>(this ObjectHelper objectHelper, string methodFullPath, SqlInfo sqlInfo)
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<TReturnValueType>(methodFullPath);
+  
+          var dbLayer = objectHelper.Context.DBLayer;
+  
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sqlInfo.CommandText, null, CommandType.Text);
+  
+          AddParameters(objectHelper, command, sqlInfo);
+  
+          var valueResponse = dbLayer.ExecuteScalar<TReturnValueType>(command);
+          if (!valueResponse.Success)
+          {
+              returnObject.Results.AddRange(valueResponse.Results);
+              return returnObject;
+          }
+  
+          returnObject.Value = valueResponse.Value;
+  
+          return returnObject;
+      }
+  
+      public static GenericResponse<int> SequenceFetchError(this ObjectHelper objectHelper, ResponseBase response, string callerMemberPath)
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<int>(callerMemberPath);
+  
+          returnObject.Results.AddRange(response.Results);
+  
+          return returnObject;
+      }
+      #endregion
+  
+      #region Methods
+      /// <summary>
+      ///     Adds the parameters.
+      /// </summary>
+      static void AddParameters(ObjectHelper objectHelper, SqlCommand command, SqlInfo sqlInfo)
+      {
+          foreach (var parameter in sqlInfo.Parameters)
+          {
+              var dbLayer = objectHelper.DBLayer;
+  
+              dbLayer.AddInParameter(command, parameter.ParameterName, parameter.SqlDbType, parameter.Value);
+          }
+      }
+  
+      /// <summary>
+      ///     Readers to list.
+      /// </summary>
+      static List<TContractType> ReadToList<TContractType>(this IDataReader reader, Action<IDataReader, TContractType> ReadContract) where TContractType : new()
+      {
+          var listOfDataContract = new List<TContractType>();
+  
+          while (reader.Read())
+          {
+              var dataContract = new TContractType();
+  
+              ReadContract(reader, dataContract);
+  
+              listOfDataContract.Add(dataContract);
+          }
+  
+          reader.Close();
+  
+          return listOfDataContract;
+      }
+      #endregion
+  }

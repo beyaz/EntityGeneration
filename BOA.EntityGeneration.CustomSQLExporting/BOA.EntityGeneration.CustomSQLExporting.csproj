@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E5E754FF-2406-43AC-8AD6-EC13038F1D6F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BOA.EntityGeneration.CustomSQLExporting</RootNamespace>
+    <AssemblyName>BOA.EntityGeneration.CustomSQLExporting</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConfigurationHelper.cs" />
+    <Compile Include="Exporters\AllInOneClassRepositoryExporting\SourceFileExporter.cs" />
+    <Compile Include="Exporters\AllInOneClassRepositoryExporting\SourceFileExporterConfig.cs" />
+    <Compile Include="Exporters\BoaRepositoryExporting\BoaRepositoryFileExporterConfig.cs" />
+    <Compile Include="Exporters\CsprojEntityExporting\EntityCsprojFileExporterConfig.cs" />
+    <Compile Include="Exporters\CsprojRepositoryExporting\RepositoryCsprojFileExporterConfig.cs" />
+    <Compile Include="Exporters\BoaRepositoryExporting\CustomSqlClassGenerator.cs" />
+    <Compile Include="Exporters\EntityFileExporting\EntityFileExporterConfig.cs" />
+    <Compile Include="Exporters\SharedFileExporting\SharedFileExporterConfig.cs" />
+    <Compile Include="Models\ReferencedEntityTypeNamingPatternContract.cs" />
+    <Compile Include="Exporters\BoaRepositoryExporting\BoaRepositoryFileExporter.cs" />
+    <Compile Include="ContextManagement\ContextContainer.cs" />
+    <Compile Include="Exporters\SharedFileExporting\SharedFileExporter.cs" />
+    <Compile Include="Exporters\EntityFileExporting\EntityFileExporter.cs" />
+    <Compile Include="Exporters\CsprojRepositoryExporting\RepositoryCsprojFileExporter.cs" />
+    <Compile Include="Exporters\CsprojEntityExporting\EntityCsprojFileExporter.cs" />
+    <Compile Include="Models\CustomSqlInfo.cs" />
+    <Compile Include="Models\CustomSqlInfoParameter.cs" />
+    <Compile Include="Models\CustomSqlInfoResult.cs" />
+    <Compile Include="ContextManagement\Context.cs" />
+    <Compile Include="ContextManagement\NamingMap.cs" />
+    <Compile Include="Wrapper\CustomSqlExporter.cs" />
+    <Compile Include="Wrapper\CustomSqlExporterConfig.cs" />
+    <Compile Include="Wrapper\ProjectCustomSqlInfoDataAccess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Exporters\AllInOneClassRepositoryExporting\SourceFileExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Exporters\BoaRepositoryExporting\BoaRepositoryFileExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Exporters\CsprojEntityExporting\EntityCsprojFileExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Exporters\CsprojRepositoryExporting\RepositoryCsprojFileExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Exporters\EntityFileExporting\EntityFileExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Exporters\SharedFileExporting\SharedFileExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Wrapper\CustomSqlExporterConfig.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BOA.TfsAccess">
+      <Version>1.0.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="DotNetDatabaseAccessUtilities">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="DotNetSerializationUtilities">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="DotNetStringUtilities">
+      <Version>1.0.0.1</Version>
+    </PackageReference>
+    <ProjectReference Include="..\BOA.EntityGeneration\BOA.EntityGeneration.csproj">
+      <Project>{2ce3e1b8-6f47-4f70-8f67-372d02d3ebc3}</Project>
+      <Name>BOA.EntityGeneration</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

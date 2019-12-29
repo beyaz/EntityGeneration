@@ -1,0 +1,13 @@
+ConnectionString: Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = d:\temp\SampleDatabase.mdf; Integrated Security = True
+TableCatalog: D:\TEMP\SAMPLEDATABASE.MDF
+CanExportBoaRepository: false
+CanExportAllSchemaInOneClassRepository: true
+CanExportCsharpProjectFiles: true
+NotExportableTables:
+- MRC.SENDING_REPORT_PARAMS_
+- POS.POS_INVENTORY_
+- STM.BUCKET_CLOSE_DETAIL
+RepositoryNamespace: BOA.Business.Kernel.Card.$(SchemaName)
+SlnDirectoryPath: d:\temp\
+EntityProjectDirectory: $(SlnDirectoryPath)Entity\$(SchemaName)\$(EntityNamespace)\
+RepositoryProjectDirectory: $(SlnDirectoryPath)Entity\$(SchemaName)\$(RepositoryNamespace)\

@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2CE3E1B8-6F47-4F70-8F67-372D02D3EBC3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BOA.EntityGeneration</RootNamespace>
+    <AssemblyName>BOA.EntityGeneration</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddOnlyList.cs" />
+    <Compile Include="ConfigurationDictionaryCompiler.cs" />
+    <Compile Include="CsprojFileGenerator.cs" />
+    <Compile Include="DbModel\DotNetTypeName.cs" />
+    <Compile Include="DbModel\Interfaces\IColumnInfo.cs" />
+    <Compile Include="DbModel\Interfaces\IIndexInfo.cs" />
+    <Compile Include="DbModel\Interfaces\ITableInfo.cs" />
+    <Compile Include="DbModel\SqlDbTypeMap.cs" />
+    <Compile Include="DbModel\SqlReaderMethods.cs" />
+    <Compile Include="DbModel\SqlServerDataAccess\IndexInfoAccess.cs" />
+    <Compile Include="DbModel\SqlServerDataAccess\SchemaInfo.cs" />
+    <Compile Include="DbModel\SqlServerDataAccess\SequenceInfo.cs" />
+    <Compile Include="DbModel\SqlServerDataAccess\TableInfoDao.cs" />
+    <Compile Include="DbModel\Types\ColumnInfo.cs" />
+    <Compile Include="DbModel\Types\IndexInfo.cs" />
+    <Compile Include="DbModel\Types\TableInfo.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FileHelper.cs" />
+    <Compile Include="FileSystem.cs" />
+    <Compile Include="MSBuild.cs" />
+    <Compile Include="MsBuildQueue.cs" />
+    <Compile Include="Names2.cs" />
+    <Compile Include="NamingMap.cs" />
+    <Compile Include="ProcessContract.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScriptModel\ContractBodyDbMembers.cs" />
+    <Compile Include="ScriptModel\ContractCommentInfo.cs" />
+    <Compile Include="ScriptModel\Creators\ContractBodyDbMembersCreator.cs" />
+    <Compile Include="ScriptModel\Creators\ContractCommentInfoCreator.cs" />
+    <Compile Include="ScriptModel\Creators\DeleteInfoCreator.cs" />
+    <Compile Include="ScriptModel\Creators\InsertInfoCreator.cs" />
+    <Compile Include="ScriptModel\Creators\SelectAllInfoCreator.cs" />
+    <Compile Include="ScriptModel\Creators\SelectByIndexInfoCreator.cs" />
+    <Compile Include="ScriptModel\Creators\SelectByPrimaryKeyInfoCreator.cs" />
+    <Compile Include="ScriptModel\Creators\UpdateByPrimaryKeyInfoCreator.cs" />
+    <Compile Include="ScriptModel\DeleteInfo.cs" />
+    <Compile Include="ScriptModel\IDeleteInfo.cs" />
+    <Compile Include="ScriptModel\InsertInfo.cs" />
+    <Compile Include="ScriptModel\ISelectByPrimaryKeyInfo.cs" />
+    <Compile Include="ScriptModel\Padding.cs" />
+    <Compile Include="ScriptModel\SelectAllInfo.cs" />
+    <Compile Include="ScriptModel\SelectByIndexInfo.cs" />
+    <Compile Include="ScriptModel\SelectByPrimaryKeyInfo.cs" />
+    <Compile Include="ScriptModel\UpdateByPrimaryKeyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BOA.TfsAccess">
+      <Version>1.0.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="DotNetDatabaseAccessUtilities">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="DotNetStringUtilities">
+      <Version>1.0.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

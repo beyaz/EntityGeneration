@@ -1,0 +1,8 @@
+DefaultAssemblyReferences: 
+  - <Reference Include="System" />
+  - <Reference Include="System.Core" />
+  - <Reference Include="System.Data" />
+  - <Reference Include="BOA.Common"><HintPath>D:\BOA\Server\bin\BOA.Common.dll</HintPath></Reference>
+  - <Reference Include="BOA.Base"><HintPath>D:\BOA\Server\bin\BOA.Base.dll</HintPath></Reference>
+  - <Reference Include="BOA.Types.Kernel.Card"><HintPath>D:\BOA\Server\bin\BOA.Types.Kernel.Card.dll</HintPath></Reference>
+  - <Reference Include="$(EntityNamespace)"><HintPath>D:\BOA\Server\bin\$(EntityNamespace).dll</HintPath></Reference>

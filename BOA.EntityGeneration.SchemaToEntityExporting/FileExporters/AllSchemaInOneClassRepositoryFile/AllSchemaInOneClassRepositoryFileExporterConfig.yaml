@@ -1,0 +1,326 @@
+OutputFilePath: $(RepositoryProjectDirectory)AllInOneRepository.cs
+NamespaceName: BOA.Business.Kernel.Card.$(SchemaName).Repository
+ClassName: $(SchemaName)Repository
+ExtraAssemblyReferences: 
+  - <Reference Include="BOA.Card.Core"><HintPath>D:\BOA\Server\bin\BOA.Card.Core.dll</HintPath></Reference>
+  - <Reference Include="System.Xml"/>
+SharedRepositoryClassAccessPath: Shared.$(CamelCasedTableName)
+UsingLines: 
+  - using System;
+  - using System.Data;
+  - using System.Data.SqlClient;
+  - using System.Collections.Generic;
+  - using System.Text;
+  - using $(EntityNamespace);
+  - using $(RepositoryNamespace).Shared;
+  - using IUnitOfWork = BOA.Card.Core.UOW.IUnitOfWork;
+  - using State = BOA.Card.Core.UOW.State;
+  - using InvalidDataException = BOA.Card.Core.ServiceBus.InvalidDataException;
+ClassDefinitionBegin: |
+  public sealed class $(SchemaName)Repository
+  {
+      readonly IUnitOfWork unitOfWork;
+      
+      public $(SchemaName)Repository(IUnitOfWork unitOfWork)
+      {
+          this.unitOfWork = unitOfWork;
+      }
+DefaultValuesForInsertMethod:
+  contractInstanceName:
+  contractInstancePropertyName:  
+  ROW_GUID: $(contractInstanceName).$(contractInstancePropertyName) = Guid.NewGuid().ToString().ToUpper(new System.Globalization.CultureInfo("en-US", false));
+  INSERT_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  SYSTEM_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  INSERT_USER_ID: $(contractInstanceName).$(contractInstancePropertyName) = unitOfWork.GetUserId();
+  USER_NAME: $(contractInstanceName).$(contractInstancePropertyName) = unitOfWork.GetUserId();
+  'string:INSERT_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = unitOfWork.GetConsumerSessionId();
+  'decimal:INSERT_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = decimal.Parse(unitOfWork.GetConsumerSessionId());
+DefaultValuesForUpdateByKeyMethod:
+  contractInstanceName:
+  contractInstancePropertyName:  
+  UPDATE_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  UPDATE_SYSTEM_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  UPDATE_USER_ID: $(contractInstanceName).$(contractInstancePropertyName) = unitOfWork.GetUserId();
+  UPDATE_USER_NAME: $(contractInstanceName).$(contractInstancePropertyName) = unitOfWork.GetUserId();
+  'string:UPDATE_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = unitOfWork.GetConsumerSessionId();
+  'decimal:UPDATE_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = decimal.Parse(unitOfWork.GetConsumerSessionId());
+ExcludedColumnNamesWhenInsertOperation:
+  - UPDATE_DATE
+  - UPDATE_USER_ID
+  - UPDATE_TOKEN_ID
+  - UpdateUserName
+  - UpdateHostName
+  - UpdateHostIP
+  - UpdateSystemDate
+EmbeddedCodes: |
+  /// <summary>
+  ///     The unit of work SQL utility
+  /// </summary>
+  static class UnitOfWorkSqlUtil
+  {
+      #region Public Methods
+      // ReSharper disable once UnusedParameter.Global
+      public static string GetUserId(this IUnitOfWork unitOfWork)
+      {
+          return BOA.Card.Core.ServiceBus.EverestContext.Current?.ContextHeader?.UserId ?? Environment.UserName;
+      }
+      
+      // ReSharper disable once UnusedParameter.Global
+      public static string GetConsumerSessionId(this IUnitOfWork unitOfWork)
+      {
+          return BOA.Card.Core.ServiceBus.EverestContext.Current?.ContextHeader?.ConsumerSessionId ?? 0.ToString();
+      }
+
+      /// <summary>
+      ///     Executes bulk insert.
+      /// </summary>
+      public static void ExecuteBulkInsert(this IUnitOfWork unitOfWork, string methodFullPath, DataTable dt)
+      {
+          var transaction = (SqlTransaction) unitOfWork.TransactionObject;
+  
+          using (var bulkCopy = new SqlBulkCopy(transaction.Connection, SqlBulkCopyOptions.Default, transaction))
+          {
+              bulkCopy.DestinationTableName = dt.TableName;
+              bulkCopy.WriteToServer(dt);
+          }
+      }
+  
+      /// <summary>
+      ///     Executes the non query.
+      /// </summary>
+      public static int ExecuteNonQuery(this IUnitOfWork unitOfWork, string methodFullPath, SqlInfo sqlInfo)
+      {
+          var localConnection = false;
+  
+          var command = InitializeCommand(unitOfWork, sqlInfo.CommandText, ref localConnection);
+  
+          AddParameters(command, sqlInfo);
+  
+          var returnValue = command.ExecuteNonQuery();
+  
+          if (localConnection && unitOfWork.State == State.ConnectionOpen)
+          {
+              unitOfWork.CloseConnection();
+          }
+  
+          return returnValue;
+      }
+  
+      /// <summary>
+      ///     Executes the reader to contract.
+      /// </summary>
+      public static TResultContractType ExecuteReaderToContract<TResultContractType>(this IUnitOfWork unitOfWork, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          var localConnection = false;
+  
+          var command = InitializeCommand(unitOfWork, sqlInfo.CommandText, ref localConnection);
+  
+          AddParameters(command, sqlInfo);
+  
+          var reader = command.ExecuteReader();
+  
+          var dataContract = default(TResultContractType);
+  
+          while (reader.Read())
+          {
+              dataContract = new TResultContractType();
+  
+              readContract(reader, dataContract);
+  
+              break;
+          }
+  
+          reader.Close();
+  
+          if (localConnection && unitOfWork.State == State.ConnectionOpen)
+          {
+              unitOfWork.CloseConnection();
+          }
+  
+          return dataContract;
+      }
+  
+      /// <summary>
+      ///     Executes the reader to list.
+      /// </summary>
+      public static List<TResultContractType> ExecuteReaderToList<TResultContractType>(this IUnitOfWork unitOfWork, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          var localConnection = false;
+  
+          var command = InitializeCommand(unitOfWork, sqlInfo.CommandText, ref localConnection);
+  
+          AddParameters(command, sqlInfo);
+  
+          var reader = command.ExecuteReader();
+  
+          var returnValue = reader.ReadToList(readContract);
+  
+          if (localConnection && unitOfWork.State == State.ConnectionOpen)
+          {
+              unitOfWork.CloseConnection();
+          }
+  
+          return returnValue;
+      }
+  
+      /// <summary>
+      ///     Executes the scalar.
+      /// </summary>
+      public static TReturnValueType ExecuteScalar<TReturnValueType>(this IUnitOfWork unitOfWork, string methodFullPath, SqlInfo sqlInfo)
+      {
+          var localConnection = false;
+  
+          var command = InitializeCommand(unitOfWork, sqlInfo.CommandText, ref localConnection);
+  
+          AddParameters(command, sqlInfo);
+  
+          var returnValue = (TReturnValueType) command.ExecuteScalar();
+  
+          if (localConnection && unitOfWork.State == State.ConnectionOpen)
+          {
+              unitOfWork.CloseConnection();
+          }
+  
+          return returnValue;
+      }
+  
+      /// <summary>
+      ///     Gets the sequence list.
+      /// </summary>
+      public static List<object> GetSequenceList(this IUnitOfWork unitOfWork, string methodFullPath, string sequenceFullName, int count)
+      {
+          var returnList = new List<object>();
+  
+          var sb = new StringBuilder();
+  
+          sb.AppendLine("DECLARE @temp TABLE ([Value] BIGINT)");
+          for (var i = 0; i < count; i++)
+          {
+              sb.AppendLine($"    Insert Into @temp SELECT (NEXT VALUE FOR {sequenceFullName})");
+          }
+  
+          sb.AppendLine("SELECT [Value] FROM @temp");
+  
+          var commandText = sb.ToString();
+  
+          var localConnection = false;
+  
+          var command = InitializeCommand(unitOfWork, commandText, ref localConnection);
+  
+          var reader = command.ExecuteReader();
+          while (reader.Read())
+          {
+              returnList.Add(reader["Value"]);
+          }
+  
+          reader.Close();
+  
+          if (localConnection && unitOfWork.State == State.ConnectionOpen)
+          {
+              unitOfWork.CloseConnection();
+          }
+  
+          return returnList;
+      }
+
+      /// <summary>
+      ///     Gets the sequence next value.
+      /// </summary>
+      public static long GetSequenceNextValue(this IUnitOfWork unitOfWork, string schemaName, string sequenceName)
+      {
+          var localConnection = false;
+  
+          var command = InitializeCommand(unitOfWork, $"SELECT (NEXT VALUE FOR {schemaName}.{sequenceName})", ref localConnection);
+  
+          var returnValue = (long) command.ExecuteScalar();
+  
+          if (localConnection && unitOfWork.State == State.ConnectionOpen)
+          {
+              unitOfWork.CloseConnection();
+          }
+  
+          return returnValue;
+      }
+      #endregion
+  
+      #region Methods
+      /// <summary>
+      ///     Adds the parameters.
+      /// </summary>
+      static void AddParameters(SqlCommand command, SqlInfo sqlInfo)
+      {
+          if (sqlInfo.Parameters == null)
+          {
+              return;
+          }
+  
+          foreach (var parameter in sqlInfo.Parameters)
+          {
+              parameter.Value = parameter.Value ?? DBNull.Value;
+
+              command.Parameters.Add(parameter);
+          }
+      }
+  
+      /// <summary>
+      ///     Initializes the command.
+      /// </summary>
+      static SqlCommand InitializeCommand(IUnitOfWork unitOfWork, string commandText, ref bool localConnection)
+      {
+          localConnection = false;
+  
+          var command = new SqlCommand(commandText);
+  
+          if (unitOfWork.IsDistributed)
+          {
+              if (null == unitOfWork.ConnectionObject)
+              {
+                  unitOfWork.OpenConnection();
+              }
+  
+              command.Connection = (SqlConnection) unitOfWork.ConnectionObject;
+          }
+          else
+          {
+              localConnection = null == unitOfWork.TransactionObject
+                                  || null == unitOfWork.ConnectionObject
+                                  || ((SqlConnection) unitOfWork.ConnectionObject).State == ConnectionState.Closed;
+  
+              if (localConnection)
+              {
+                  unitOfWork.OpenConnection();
+              }
+              else
+              {
+                  var transactionObject = unitOfWork.TransactionObject as IDbTransaction;
+                  command.Transaction = (SqlTransaction) transactionObject;
+              }
+  
+              command.Connection = (SqlConnection) unitOfWork.ConnectionObject;
+          }
+  
+          return command;
+      }
+  
+      /// <summary>
+      ///     Readers to list.
+      /// </summary>
+      static List<TContractType> ReadToList<TContractType>(this IDataReader reader, Action<IDataReader, TContractType> ReadContract) where TContractType : new()
+      {
+          var listOfDataContract = new List<TContractType>();
+  
+          while (reader.Read())
+          {
+              var dataContract = new TContractType();
+  
+              ReadContract(reader, dataContract);
+  
+              listOfDataContract.Add(dataContract);
+          }
+  
+          reader.Close();
+  
+          return listOfDataContract;
+      }
+      #endregion
+  }

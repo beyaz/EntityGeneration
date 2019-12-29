@@ -1,0 +1,176 @@
+OutputFilePath: $(RepositoryProjectDirectory)AllInOneRepository.cs
+NamespaceName: BOA.Business.Kernel.Card.$(SchemaName).Repository
+ClassName: $(SchemaName)Repository
+ExtraAssemblyReferences: 
+  - <Reference Include="System.Xml" />
+  - <PackageReference Include="DotNetDatabaseAccessUtilities"><Version>1.0.0.1</Version></PackageReference>
+SharedRepositoryClassAccessPath: Shared.$(CamelCasedTableName)
+UsingLines: 
+  - using System;
+  - using System.IO;
+  - using System.Data;
+  - using System.Data.SqlClient;
+  - using System.Collections.Generic;
+  - using $(EntityNamespace);
+  - using $(RepositoryNamespace).Shared;
+  - using IUnitOfWork = DotNetDatabaseAccessUtilities.IDatabase;
+ClassDefinitionBegin: |
+  public sealed class $(SchemaName)Repository
+  {
+      readonly IUnitOfWork unitOfWork;
+      
+      public $(SchemaName)Repository(IUnitOfWork unitOfWork)
+      {
+          this.unitOfWork = unitOfWork;
+      }
+DefaultValuesForInsertMethod:
+  contractInstanceName:
+  contractInstancePropertyName:  
+  ROW_GUID: $(contractInstanceName).$(contractInstancePropertyName) = Guid.NewGuid().ToString().ToUpper(new System.Globalization.CultureInfo("en-US", false));
+  INSERT_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  'string:INSERT_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = "0";
+  'decimal:INSERT_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = 0;
+DefaultValuesForUpdateByKeyMethod:
+  contractInstanceName:
+  contractInstancePropertyName:  
+  UPDATE_DATE: $(contractInstanceName).$(contractInstancePropertyName) = DateTime.Now;
+  'string:UPDATE_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = "0";
+  'decimal:UPDATE_TOKEN_ID': $(contractInstanceName).$(contractInstancePropertyName) = 0;
+ExcludedColumnNamesWhenInsertOperation:
+  - UPDATE_DATE
+  - UPDATE_USER_ID
+  - UPDATE_TOKEN_ID
+  - UpdateUserName
+  - UpdateHostName
+  - UpdateHostIP
+  - UpdateSystemDate
+EmbeddedCodes: |
+  /// <summary>
+  ///     The unit of work SQL utility
+  /// </summary>
+  static class UnitOfWorkSqlUtil
+  {
+      #region Public Methods
+      /// <summary>
+      ///     Executes the non query.
+      /// </summary>
+      public static int ExecuteNonQuery(this IUnitOfWork database, string methodFullPath, SqlInfo sqlInfo)
+      {
+          database.CommandText = sqlInfo.CommandText;
+  
+          AddParameters(database, sqlInfo);
+  
+          return database.ExecuteNonQuery();
+      }
+      
+      /// <summary>
+      ///     Executes bulk insert.
+      /// </summary>
+      public static void ExecuteBulkInsert(this IUnitOfWork unitOfWork, string methodFullPath, DataTable dt)
+      {
+          var transaction = (SqlTransaction) unitOfWork.Transaction;
+                  
+          using (var bulkCopy = new SqlBulkCopy(transaction.Connection, SqlBulkCopyOptions.Default, transaction))
+          {
+              bulkCopy.DestinationTableName = dt.TableName;
+              bulkCopy.WriteToServer(dt);
+          }
+      }
+        
+      /// <summary>
+      ///     Executes the reader to contract.
+      /// </summary>
+      public static TResultContractType ExecuteReaderToContract<TResultContractType>(this IUnitOfWork database, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          database.CommandText = sqlInfo.CommandText;
+  
+          AddParameters(database, sqlInfo);
+  
+          var reader = database.ExecuteReader();
+  
+          var dataContract = default(TResultContractType);
+  
+          while (reader.Read())
+          {
+              dataContract = new TResultContractType();
+  
+              readContract(reader, dataContract);
+  
+              break;
+          }
+  
+          reader.Close();
+  
+          return dataContract;
+      }
+  
+      /// <summary>
+      ///     Executes the reader to list.
+      /// </summary>
+      public static List<TResultContractType> ExecuteReaderToList<TResultContractType>(this IUnitOfWork database, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          database.CommandText = sqlInfo.CommandText;
+  
+          AddParameters(database, sqlInfo);
+  
+          var reader = database.ExecuteReader();
+  
+          return reader.ReadToList(readContract);
+      }
+  
+      /// <summary>
+      ///     Executes the scalar.
+      /// </summary>
+      public static TReturnValueType ExecuteScalar<TReturnValueType>(this IUnitOfWork database, string methodFullPath, SqlInfo sqlInfo)
+      {
+          database.CommandText = sqlInfo.CommandText;
+  
+          AddParameters(database, sqlInfo);
+  
+          return (TReturnValueType) database.ExecuteScalar();
+      }
+      #endregion
+  
+      #region Methods
+      /// <summary>
+      ///     Adds the parameters.
+      /// </summary>
+      static void AddParameters(IUnitOfWork unitOfWork, SqlInfo sqlInfo)
+      {
+           if (sqlInfo.Parameters == null)
+           {
+               return;
+           }
+           
+           foreach (var parameter in sqlInfo.Parameters)
+           {
+               parameter.Value = parameter.Value ?? DBNull.Value;
+           }
+             
+           unitOfWork.AddParameters(sqlInfo.Parameters);
+      }
+  
+         
+  
+      /// <summary>
+      ///     Readers to list.
+      /// </summary>
+      static List<TContractType> ReadToList<TContractType>(this IDataReader reader, Action<IDataReader, TContractType> ReadContract) where TContractType : new()
+      {
+          var listOfDataContract = new List<TContractType>();
+  
+          while (reader.Read())
+          {
+              var dataContract = new TContractType();
+  
+              ReadContract(reader, dataContract);
+  
+              listOfDataContract.Add(dataContract);
+          }
+  
+          reader.Close();
+  
+          return listOfDataContract;
+      }
+      #endregion
+  }

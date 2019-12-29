@@ -1,0 +1,125 @@
+OutputFilePath: $(RepositoryProjectDirectory)Boa.cs
+SharedRepositoryClassAccessPath: Shared.$(RepositoryClassName)
+UsingLines: 
+  - using System;
+  - using System.Data;
+  - using System.Data.SqlClient;
+  - using System.Collections.Generic;
+  - using BOA.Base;
+  - using BOA.Base.Data;
+  - using BOA.Common.Types;
+  - using $(EntityNamespace);
+  - using $(RepositoryNamespace).Shared;  
+EmbeddedCodes: |
+  /// <summary>
+  ///     The object helper SQL utility
+  /// </summary>
+  static class ObjectHelperSqlUtil
+  {
+      #region Public Methods
+  
+      /// <summary>
+      ///     Executes the reader to contract.
+      /// </summary>
+      public static GenericResponse<TResultContractType> ExecuteReaderToContract<TResultContractType>(this ObjectHelper objectHelper, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<TResultContractType>(methodFullPath);
+  
+          var dbLayer = objectHelper.Context.DBLayer;
+  
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sqlInfo.CommandText, null, CommandType.Text);
+  
+          AddParameters(objectHelper, command, sqlInfo);
+  
+          var readerResponse = dbLayer.ExecuteReader(command);
+          if (!readerResponse.Success)
+          {
+              returnObject.Results.AddRange(readerResponse.Results);
+              return returnObject;
+          }
+  
+          var reader = readerResponse.Value;
+  
+          var dataContract = default(TResultContractType);
+  
+          while (reader.Read())
+          {
+              dataContract = new TResultContractType();
+  
+              readContract(reader, dataContract);
+  
+              break;
+          }
+  
+          reader.Close();
+  
+          returnObject.Value = dataContract;
+  
+          return returnObject;
+      }
+  
+      /// <summary>
+      ///     Executes the reader to list.
+      /// </summary>
+      public static GenericResponse<List<TResultContractType>> ExecuteReaderToList<TResultContractType>(this ObjectHelper objectHelper, string methodFullPath, SqlInfo sqlInfo, Action<IDataReader, TResultContractType> readContract) where TResultContractType : new()
+      {
+          var returnObject = objectHelper.InitializeGenericResponse<List<TResultContractType>>(methodFullPath);
+  
+          var dbLayer = objectHelper.Context.DBLayer;
+  
+          var command = dbLayer.GetDBCommand(Databases.BOACard, sqlInfo.CommandText, null, CommandType.Text);
+  
+          AddParameters(objectHelper, command, sqlInfo);
+  
+          var readerResponse = dbLayer.ExecuteReader(command);
+          if (!readerResponse.Success)
+          {
+              returnObject.Results.AddRange(readerResponse.Results);
+              return returnObject;
+          }
+  
+          var reader = readerResponse.Value;
+  
+          returnObject.Value = reader.ReadToList(readContract);
+  
+          return returnObject;
+      }
+  
+      #endregion
+  
+      #region Methods
+      /// <summary>
+      ///     Adds the parameters.
+      /// </summary>
+      static void AddParameters(ObjectHelper objectHelper, SqlCommand command, SqlInfo sqlInfo)
+      {
+          foreach (var parameter in sqlInfo.Parameters)
+          {
+              var dbLayer = objectHelper.DBLayer;
+  
+              dbLayer.AddInParameter(command, parameter.ParameterName, parameter.SqlDbType, parameter.Value);
+          }
+      }
+  
+      /// <summary>
+      ///     Readers to list.
+      /// </summary>
+      static List<TContractType> ReadToList<TContractType>(this IDataReader reader, Action<IDataReader, TContractType> ReadContract) where TContractType : new()
+      {
+          var listOfDataContract = new List<TContractType>();
+  
+          while (reader.Read())
+          {
+              var dataContract = new TContractType();
+  
+              ReadContract(reader, dataContract);
+  
+              listOfDataContract.Add(dataContract);
+          }
+  
+          reader.Close();
+  
+          return listOfDataContract;
+      }
+      #endregion
+  }

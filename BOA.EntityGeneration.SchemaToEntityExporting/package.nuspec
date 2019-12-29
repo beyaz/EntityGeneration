@@ -1,0 +1,25 @@
+<?xml version = "1.0" ?>
+<package>
+  <metadata>
+    <id>BOA.EntityGeneration</id>
+    <version>1.0.0.1</version>
+    <title>WhiteStone</title>
+    <authors>Abdullah Beyaztaş</authors>
+    <owners>Abdullah Beyaztaş</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Abdullah Beyaztaş</description>
+    <releaseNotes>WhiteStone</releaseNotes>
+    <copyright>Abdullah Beyaztaş</copyright>
+    <tags>
+    </tags>
+    <dependencies>
+      <group targetFramework = "net45" >
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src = "bin\Debug\BOA.EntityGeneration.dll" target = "lib/net452" />
+    <file src = "bin\Debug\BOA.EntityGeneration.XML" target = "lib/net452" />
+  </files>
+</package>
+<!--oy2olrgvda4d4plog5pq35pxd4cje7lubgh7fl6ovyjojm-->

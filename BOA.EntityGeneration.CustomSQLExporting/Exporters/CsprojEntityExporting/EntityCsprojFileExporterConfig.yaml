@@ -1,0 +1,4 @@
+DefaultAssemblyReferences:
+  - <Reference Include="BOA.Common"><HintPath>D:\BOA\Server\bin\BOA.Common.dll</HintPath></Reference>
+  - <Reference Include="System" />
+  - <Reference Include="System.Core" />

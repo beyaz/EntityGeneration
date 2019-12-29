@@ -1,0 +1,8 @@
+OutputFilePath: $(EntityProjectDirectory)All.cs
+NamespaceName: BOA.Types.Kernel.Card.$(SchemaName)
+ClassName: $(CamelCasedTableName)Contract
+UsingLines:
+  - using System;
+AssemblyReferences:
+  - <Reference Include="System" />
+  - <Reference Include="System.Core" />

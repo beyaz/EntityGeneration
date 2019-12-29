@@ -1,0 +1,3 @@
+ConstantsProjectGeneration: Configurations\ConstantsProjectGeneration\
+CustomSQLExporting: Configurations\CustomSQLExporting\
+SchemaToEntityExporting: Configurations\SchemaToEntityExporting\

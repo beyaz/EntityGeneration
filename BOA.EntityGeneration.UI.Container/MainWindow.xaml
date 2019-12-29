@@ -1,0 +1,43 @@
+﻿<Controls:MetroWindow x:Class = "BOA.EntityGeneration.UI.Container.MainWindow"
+                      xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:local = "clr-namespace:BOA.EntityGeneration.UI.Container"
+                      xmlns:Controls = "clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      mc:Ignorable = "d"
+                      xmlns:entityGenerationComponents = "clr-namespace:BOA.EntityGeneration.UI.Container.EntityGeneration.Components"
+                      xmlns:customSqlGenerationComponents = "clr-namespace:BOA.EntityGeneration.UI.Container.CustomSqlGeneration.Components"
+                      xmlns:constantsProjectGenerationComponents = "clr-namespace:BOA.EntityGeneration.UI.Container.ConstantsProjectGeneration.Components"
+                      x:Name = "CodeBehind"
+                      SizeToContent = "Height"
+                      WindowStartupLocation = "CenterScreen"
+                      d:DataContext = "{d:DesignInstance local:MainWindowModel, IsDesignTimeCreatable=True}"
+                      Title = "Code Generation" MaxHeight = "600" Width = "500" MaxWidth = "500" >
+    <StackPanel Margin = "10" >
+
+        <GroupBox Header = "Check-in Comment" Margin = "0,0,0,10" >
+            <StackPanel>
+                <TextBox FontWeight = "Bold" Text = "{Binding CheckinComment}" />
+            </StackPanel>
+        </GroupBox>
+
+        <TabControl>
+
+            <TabItem Header = "Entity" >
+                <entityGenerationComponents:Container Margin = "5" />
+            </TabItem>
+
+            <TabItem Header = "Custom SQL" >
+                <customSqlGenerationComponents:Container Margin = "5" />
+            </TabItem>
+
+            <TabItem Header = "Constant" >
+                <constantsProjectGenerationComponents:Container Margin = "5" />
+            </TabItem>
+
+        </TabControl>
+
+    </StackPanel>
+
+</Controls:MetroWindow>
