@@ -78,7 +78,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ProcessInfo.Text    = $"Processing '{objectId}'";
                 ProcessInfo.Current = switchCaseIndex;
 
-                Context.CustomSqlInfo = ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(Database, ProfileName, objectId, Config, switchCaseIndex++);
+                Context.CustomSqlInfo = ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(new GetCustomSqlInfoInput(Database, ProfileName, objectId, Config, switchCaseIndex++));
 
                 InitializeCustomSqlNamingPattern();
 

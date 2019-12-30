@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using BOA.EntityGeneration.CustomSQLExporting.Models;
 using BOA.EntityGeneration.CustomSQLExporting.Wrapper;
 using DotNetDatabaseAccessUtilities;
@@ -31,34 +33,40 @@ namespace BOA.EntityGeneration.CustomSQLExporting
 
                 var customSqlInfo = new CustomSqlInfo
                 {
-                    Name = "Abc",
-                    Parameters = new[]
+                    Name = "Abc"
+                };
+
+                context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(It.IsAny<GetCustomSqlNamesInfProfileInput>())).Returns(new List<string> {string.Empty});
+
+                context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadFromDatabase(It.IsAny<GetCustomSqlInfoInput>())).Returns(customSqlInfo);
+
+                var inputParameters = new List<ProjectCustomSqlInfoDataAccess.ObjectParameterInfo>
+                {
+                    new ProjectCustomSqlInfoDataAccess.ObjectParameterInfo
                     {
-                        new CustomSqlInfoParameter
-                        {
-                            Name          = "USER_ID",
-                            IsNullable    = true,
-                            SqlDbTypeName = SqlDbType.BigInt
-                        }
+                        isNullable = true,
+                        dataType   = "bigint",
+                        name       = "aloha"
                     },
-                    ResultColumns = new List<CustomSqlInfoResult>
+                    new ProjectCustomSqlInfoDataAccess.ObjectParameterInfo
                     {
-                        new CustomSqlInfoResult
-                        {
-                            Name     = "y",
-                            DataType = "int"
-                        }
+                        isNullable = true,
+                        dataType   = "char",
+                        name       = "my_FLAG"
+                    }
+                };
+                var resultColumns = new List<CustomSqlInfoResult>
+                {
+                    new CustomSqlInfoResult
+                    {
+                        Name     = "y",
+                        DataType = "int"
                     }
                 };
 
-                context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(new GetCustomSqlNamesInfProfileInput(It.IsAny<IDatabase>(), It.IsAny<string>(), It.IsAny<CustomSqlExporterConfig>()))).Returns(new List<string> {string.Empty});
-                context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(It.IsAny<IDatabase>(),
-                                                                                    It.IsAny<string >(),
-                                                                                    It.IsAny<string >(), 
-                                                                                    It.IsAny<CustomSqlExporterConfig>() ,
-                                                                                    It.IsAny<int>()))
-                                                                                    .Returns(customSqlInfo);
 
+                context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadInputParametersFromDatabase(It.IsAny<CustomSqlInfo>(), It.IsAny<IDatabase>())).Returns(inputParameters);
+                context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadResultColumns(It.IsAny<CustomSqlInfo>(), It.IsAny<IDatabase>())).Returns(resultColumns);
                 
 
                 exporter.Export("Xyz");

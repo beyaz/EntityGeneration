@@ -17,15 +17,29 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             ProfileId = profileId;
             Config = config;
         }
-
-        public GetCustomSqlNamesInfProfileInput()
-        {
-            
-        }
+        
 
         public IDatabase Database { get; set; }
         public string ProfileId { get; set; }
         public CustomSqlExporterConfig Config { get; set; }
+    }
+
+    public class GetCustomSqlInfoInput
+    {
+        public GetCustomSqlInfoInput(IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
+        {
+            Database = database;
+            ProfileId = profileId;
+            Id = id;
+            Config = config;
+            SwitchCaseIndex = switchCaseIndex;
+        }
+
+        public IDatabase Database { get; set; }
+        public string ProfileId { get; set; }
+        public string Id { get; set; }
+        public CustomSqlExporterConfig Config { get; set; }
+        public int SwitchCaseIndex { get; set; }
     }
 
     /// <summary>
@@ -33,21 +47,20 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     /// </summary>
     public class ProjectCustomSqlInfoDataAccess
     {
-
-        #region Public Methods
-        public static CustomSqlInfo GetCustomSqlInfo(IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
+        
+        internal static CustomSqlInfo ReadFromDatabase(GetCustomSqlInfoInput customSqlInfoInput)
         {
             var customSqlInfo = new CustomSqlInfo
             {
-                Name      = id,
-                ProfileId = profileId
+                Name      = customSqlInfoInput.Id,
+                ProfileId = customSqlInfoInput.ProfileId
             };
 
-            database.CommandText        = config.CustomSQL_Get_SQL_Item_Info;
-            database[nameof(profileId)] = profileId;
-            database[nameof(id)]        = id;
+            customSqlInfoInput.Database.CommandText                           = customSqlInfoInput.Config.CustomSQL_Get_SQL_Item_Info;
+            customSqlInfoInput.Database[nameof(customSqlInfoInput.ProfileId)] = customSqlInfoInput.ProfileId;
+            customSqlInfoInput.Database[nameof(customSqlInfoInput.Id)]        = customSqlInfoInput.Id;
 
-            var reader = database.ExecuteReader();
+            var reader = customSqlInfoInput.Database.ExecuteReader();
             while (reader.Read())
             {
                 customSqlInfo.Sql                   = reader[nameof(CustomSqlInfo.Sql)] + string.Empty;
@@ -59,9 +72,17 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             reader.Close();
 
-            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, database);
+            return customSqlInfo;
+        }
 
-            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, database);
+        #region Public Methods
+        public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput customSqlInfoInput)
+        {
+            var customSqlInfo = ReadFromDatabase(customSqlInfoInput);
+
+            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, customSqlInfoInput.Database);
+
+            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, customSqlInfoInput.Database);
 
             if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
                 customSqlInfo.ResultColumns.Count == 1)
@@ -71,7 +92,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             Fill(customSqlInfo);
 
-            customSqlInfo.SwitchCaseIndex = switchCaseIndex;
+            customSqlInfo.SwitchCaseIndex = customSqlInfoInput.SwitchCaseIndex;
 
             return customSqlInfo;
         }
@@ -296,6 +317,34 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             throw new NotImplementedException(dataType);
         }
 
+        internal class ObjectParameterInfo
+        {
+            public string name { get; set; }
+            public string dataType { get; set; }
+            public bool isNullable { get; set; }
+        }
+
+        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, IDatabase database)
+        {
+            var items = new List<ObjectParameterInfo>();
+
+            database.CommandText = $"select parameterid,datatype,nullableflag from dbo.objectparameters WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
+
+            var reader = database.ExecuteReader();
+            while (reader.Read())
+            {
+                items.Add(new ObjectParameterInfo { 
+                    name       = reader["parameterid"].ToString(),
+                    dataType   = reader["datatype"].ToString(),
+                    isNullable = reader["nullableflag"] + string.Empty == "1"
+                });
+            }
+
+            reader.Close();
+
+            return items;
+        }
+
         /// <summary>
         ///     Reads the input parameters.
         /// </summary>
@@ -303,14 +352,12 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         {
             var items = new List<CustomSqlInfoParameter>();
 
-            database.CommandText = $"select parameterid,datatype,nullableflag from dbo.objectparameters WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
-
-            var reader = database.ExecuteReader();
-            while (reader.Read())
+            var list = ReadInputParametersFromDatabase(customSqlInfo,database);
+            foreach (var y in list)
             {
-                var name       = reader["parameterid"].ToString();
-                var dataType   = reader["datatype"].ToString();
-                var isNullable = reader["nullableflag"] + string.Empty == "1";
+                var name = y.name;
+                var dataType = y.dataType;
+                var isNullable = y.isNullable;
 
                 var cSharpPropertyTypeName = GetDataTypeInDotnet(dataType, isNullable);
 
@@ -350,7 +397,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 items.Add(item);
             }
 
-            reader.Close();
+
+           
 
             return items;
         }
@@ -358,7 +406,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         /// <summary>
         ///     Reads the result columns.
         /// </summary>
-        static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database)
+        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database)
         {
             var items = new List<CustomSqlInfoResult>();
 
