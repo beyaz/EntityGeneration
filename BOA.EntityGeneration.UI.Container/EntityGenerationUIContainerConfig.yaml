@@ -22,7 +22,7 @@ ProfileNames:
   - ParameterManagement
   - CreditCardLegalFollowup
   - CreditCardLifecycle
-  - CreditCardIssuing,
+  - CreditCardIssuing
   - CreditCardStatementBatch
   - CreditCardTransaction
   - EMB_BATCH
