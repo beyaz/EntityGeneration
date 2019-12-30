@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CustomSqlExporterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BOA.EntityGeneration.CustomSQLExporting\BOA.EntityGeneration.CustomSQLExporting.csproj">
