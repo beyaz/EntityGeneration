@@ -42,6 +42,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -57,6 +58,10 @@
     <ProjectReference Include="..\BOA.EntityGeneration.SchemaToEntityExporting\BOA.EntityGeneration.SchemaToEntityExporting.csproj">
       <Project>{cb6a81d7-d871-462c-93cc-dd037180bfb4}</Project>
       <Name>BOA.EntityGeneration.SchemaToEntityExporting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BOA.EntityGeneration\BOA.EntityGeneration.csproj">
+      <Project>{2CE3E1B8-6F47-4F70-8F67-372D02D3EBC3}</Project>
+      <Name>BOA.EntityGeneration</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

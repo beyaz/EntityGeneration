@@ -14,6 +14,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     /// </summary>
     public class ProjectCustomSqlInfoDataAccess
     {
+
         #region Public Methods
         public static CustomSqlInfo GetCustomSqlInfo(IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
         {
