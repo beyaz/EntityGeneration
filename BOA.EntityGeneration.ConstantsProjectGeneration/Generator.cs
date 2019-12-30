@@ -95,6 +95,15 @@ namespace BOA.EntityGeneration.ConstantsProjectGeneration
             }
         }
 
+        static string Normalize(string profileName)
+        {
+            if (profileName.StartsWith("CRD_"))
+            {
+                profileName = profileName.Replace("CRD_", "CREDIT_CARD_");
+            }
+
+            return profileName;
+        }
         void WriteContent()
         {
             foreach (var line in Config.UsingLines)
@@ -113,7 +122,7 @@ namespace BOA.EntityGeneration.ConstantsProjectGeneration
             {
                 ProcessInfo.Text = $"Exporting profile: {profileName}";
 
-                var namespaceFullName = Config.NamespaceName.Replace("$(profileName)", profileName.ToContractName());
+                var namespaceFullName = Config.NamespaceName.Replace("$(profileName)", Normalize(profileName).ToContractName());
 
                 File.AppendLine($"namespace {namespaceFullName}");
                 File.OpenBracket();
