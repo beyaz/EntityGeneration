@@ -78,7 +78,7 @@ namespace BOA.EntityGeneration.ConstantsProjectGeneration
             Context.MsBuildQueue.Push(csprojFilePath);
         }
 
-        void ExportFile()
+        internal void ExportFile()
         {
             ProcessInfo.Text = "Writing files.";
 
@@ -87,7 +87,7 @@ namespace BOA.EntityGeneration.ConstantsProjectGeneration
             FileSystem.WriteAllText(filePath, File.ToString());
         }
 
-        void InitEnumInformationList()
+        internal void InitEnumInformationList()
         {
             using (var connection = Context.CreateConnection())
             {
