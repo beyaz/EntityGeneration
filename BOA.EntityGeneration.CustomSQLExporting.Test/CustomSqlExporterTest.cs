@@ -51,7 +51,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting
                     }
                 };
 
-                context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(It.IsAny<IDatabase>(), It.IsAny<string>(), It.IsAny<CustomSqlExporterConfig>())).Returns(new List<string> {string.Empty});
+                context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(new GetCustomSqlNamesInfProfileInput(It.IsAny<IDatabase>(), It.IsAny<string>(), It.IsAny<CustomSqlExporterConfig>()))).Returns(new List<string> {string.Empty});
                 context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(It.IsAny<IDatabase>(),
                                                                                     It.IsAny<string >(),
                                                                                     It.IsAny<string >(), 

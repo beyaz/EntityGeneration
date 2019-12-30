@@ -66,7 +66,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             ProcessInfo.Text = "Fetching profile informations...";
 
-            var customSqlNamesInfProfile = ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(Database, ProfileName, Config);
+            var customSqlNamesInfProfile = ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(new GetCustomSqlNamesInfProfileInput(Database, ProfileName, Config));
 
             Context.OnProfileInfoInitialized();
 

@@ -9,6 +9,25 @@ using DotNetStringUtilities;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 {
+    public class GetCustomSqlNamesInfProfileInput
+    {
+        public GetCustomSqlNamesInfProfileInput(IDatabase database, string profileId, CustomSqlExporterConfig config)
+        {
+            Database = database;
+            ProfileId = profileId;
+            Config = config;
+        }
+
+        public GetCustomSqlNamesInfProfileInput()
+        {
+            
+        }
+
+        public IDatabase Database { get; set; }
+        public string ProfileId { get; set; }
+        public CustomSqlExporterConfig Config { get; set; }
+    }
+
     /// <summary>
     ///     The project custom SQL information data access
     /// </summary>
@@ -57,14 +76,14 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             return customSqlInfo;
         }
 
-        public static IReadOnlyList<string> GetCustomSqlNamesInfProfile(IDatabase database, string profileId, CustomSqlExporterConfig config)
+        public static IReadOnlyList<string> GetCustomSqlNamesInfProfile(GetCustomSqlNamesInfProfileInput customSqlNamesInfProfileInput)
         {
             var objectIdList = new List<string>();
 
-            database.CommandText        = config.CustomSQLNamesDefinedToProfileSql;
-            database[nameof(profileId)] = profileId;
+            customSqlNamesInfProfileInput.Database.CommandText        = customSqlNamesInfProfileInput.Config.CustomSQLNamesDefinedToProfileSql;
+            customSqlNamesInfProfileInput.Database[nameof(customSqlNamesInfProfileInput.ProfileId)] = customSqlNamesInfProfileInput.ProfileId;
 
-            var reader = database.ExecuteReader();
+            var reader = customSqlNamesInfProfileInput.Database.ExecuteReader();
             while (reader.Read())
             {
                 objectIdList.Add(reader["Id"].ToString());
