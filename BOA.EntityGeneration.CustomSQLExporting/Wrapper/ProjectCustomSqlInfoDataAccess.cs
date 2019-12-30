@@ -11,35 +11,44 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 {
     public class GetCustomSqlNamesInfProfileInput
     {
+        #region Constructors
         public GetCustomSqlNamesInfProfileInput(IDatabase database, string profileId, CustomSqlExporterConfig config)
         {
-            Database = database;
+            Database  = database;
             ProfileId = profileId;
-            Config = config;
+            Config    = config;
         }
-        
+        #endregion
 
-        public IDatabase Database { get; set; }
-        public string ProfileId { get; set; }
+        #region Public Properties
         public CustomSqlExporterConfig Config { get; set; }
+
+        public IDatabase Database  { get; set; }
+        public string    ProfileId { get; set; }
+        #endregion
     }
 
     public class GetCustomSqlInfoInput
     {
+        #region Constructors
         public GetCustomSqlInfoInput(IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
         {
-            Database = database;
-            ProfileId = profileId;
-            Id = id;
-            Config = config;
+            Database        = database;
+            ProfileId       = profileId;
+            Id              = id;
+            Config          = config;
             SwitchCaseIndex = switchCaseIndex;
         }
+        #endregion
 
-        public IDatabase Database { get; set; }
-        public string ProfileId { get; set; }
-        public string Id { get; set; }
+        #region Public Properties
         public CustomSqlExporterConfig Config { get; set; }
-        public int SwitchCaseIndex { get; set; }
+
+        public IDatabase Database        { get; set; }
+        public string    Id              { get; set; }
+        public string    ProfileId       { get; set; }
+        public int       SwitchCaseIndex { get; set; }
+        #endregion
     }
 
     /// <summary>
@@ -47,7 +56,48 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     /// </summary>
     public class ProjectCustomSqlInfoDataAccess
     {
-        
+        #region Public Methods
+        public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput customSqlInfoInput)
+        {
+            var customSqlInfo = ReadFromDatabase(customSqlInfoInput);
+
+            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, customSqlInfoInput.Database);
+
+            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, customSqlInfoInput.Database);
+
+            if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
+                customSqlInfo.ResultColumns.Count == 1)
+            {
+                customSqlInfo.ResultContractIsReferencedToEntity = true;
+            }
+
+            Fill(customSqlInfo);
+
+            customSqlInfo.SwitchCaseIndex = customSqlInfoInput.SwitchCaseIndex;
+
+            return customSqlInfo;
+        }
+
+        public static IReadOnlyList<string> GetCustomSqlNamesInfProfile(GetCustomSqlNamesInfProfileInput customSqlNamesInfProfileInput)
+        {
+            var objectIdList = new List<string>();
+
+            customSqlNamesInfProfileInput.Database.CommandText                                      = customSqlNamesInfProfileInput.Config.CustomSQLNamesDefinedToProfileSql;
+            customSqlNamesInfProfileInput.Database[nameof(customSqlNamesInfProfileInput.ProfileId)] = customSqlNamesInfProfileInput.ProfileId;
+
+            var reader = customSqlNamesInfProfileInput.Database.ExecuteReader();
+            while (reader.Read())
+            {
+                objectIdList.Add(reader["Id"].ToString());
+            }
+
+            reader.Close();
+
+            return objectIdList;
+        }
+        #endregion
+
+        #region Methods
         internal static CustomSqlInfo ReadFromDatabase(GetCustomSqlInfoInput customSqlInfoInput)
         {
             var customSqlInfo = new CustomSqlInfo
@@ -75,48 +125,57 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             return customSqlInfo;
         }
 
-        #region Public Methods
-        public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput customSqlInfoInput)
+        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, IDatabase database)
         {
-            var customSqlInfo = ReadFromDatabase(customSqlInfoInput);
+            var items = new List<ObjectParameterInfo>();
 
-            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, customSqlInfoInput.Database);
+            database.CommandText = $"select parameterid,datatype,nullableflag from dbo.objectparameters WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
 
-            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, customSqlInfoInput.Database);
-
-            if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
-                customSqlInfo.ResultColumns.Count == 1)
-            {
-                customSqlInfo.ResultContractIsReferencedToEntity = true;
-            }
-
-            Fill(customSqlInfo);
-
-            customSqlInfo.SwitchCaseIndex = customSqlInfoInput.SwitchCaseIndex;
-
-            return customSqlInfo;
-        }
-
-        public static IReadOnlyList<string> GetCustomSqlNamesInfProfile(GetCustomSqlNamesInfProfileInput customSqlNamesInfProfileInput)
-        {
-            var objectIdList = new List<string>();
-
-            customSqlNamesInfProfileInput.Database.CommandText        = customSqlNamesInfProfileInput.Config.CustomSQLNamesDefinedToProfileSql;
-            customSqlNamesInfProfileInput.Database[nameof(customSqlNamesInfProfileInput.ProfileId)] = customSqlNamesInfProfileInput.ProfileId;
-
-            var reader = customSqlNamesInfProfileInput.Database.ExecuteReader();
+            var reader = database.ExecuteReader();
             while (reader.Read())
             {
-                objectIdList.Add(reader["Id"].ToString());
+                items.Add(new ObjectParameterInfo
+                {
+                    name       = reader["parameterid"].ToString(),
+                    dataType   = reader["datatype"].ToString(),
+                    isNullable = reader["nullableflag"] + string.Empty == "1"
+                });
             }
 
             reader.Close();
 
-            return objectIdList;
+            return items;
         }
-        #endregion
 
-        #region Methods
+        /// <summary>
+        ///     Reads the result columns.
+        /// </summary>
+        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database)
+        {
+            var items = new List<CustomSqlInfoResult>();
+
+            database.CommandText = $"select resultid,datatype, nullableflag from dbo.objectresults WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
+
+            
+            var reader = database.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var item = new CustomSqlInfoResult
+                {
+                    Name       = reader["resultid"].ToString(),
+                    DataType   = reader["datatype"].ToString(),
+                    IsNullable = reader["nullableflag"] + string.Empty == "1"
+                };
+
+                items.Add(item);
+            }
+
+            reader.Close();
+
+            return items;
+        }
+
         /// <summary>
         ///     Fills the specified custom SQL information.
         /// </summary>
@@ -317,47 +376,18 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             throw new NotImplementedException(dataType);
         }
 
-        internal class ObjectParameterInfo
-        {
-            public string name { get; set; }
-            public string dataType { get; set; }
-            public bool isNullable { get; set; }
-        }
-
-        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, IDatabase database)
-        {
-            var items = new List<ObjectParameterInfo>();
-
-            database.CommandText = $"select parameterid,datatype,nullableflag from dbo.objectparameters WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
-
-            var reader = database.ExecuteReader();
-            while (reader.Read())
-            {
-                items.Add(new ObjectParameterInfo { 
-                    name       = reader["parameterid"].ToString(),
-                    dataType   = reader["datatype"].ToString(),
-                    isNullable = reader["nullableflag"] + string.Empty == "1"
-                });
-            }
-
-            reader.Close();
-
-            return items;
-        }
-
         /// <summary>
         ///     Reads the input parameters.
         /// </summary>
         static IReadOnlyList<CustomSqlInfoParameter> ReadInputParameters(CustomSqlInfo customSqlInfo, IDatabase database)
         {
-            var items = new List<CustomSqlInfoParameter>();
+            var list = ReadInputParametersFromDatabase(customSqlInfo, database);
 
-            var list = ReadInputParametersFromDatabase(customSqlInfo,database);
-            foreach (var y in list)
+            return list.ToList().ConvertAll(x =>
             {
-                var name = y.name;
-                var dataType = y.dataType;
-                var isNullable = y.isNullable;
+                var name       = x.name;
+                var dataType   = x.dataType;
+                var isNullable = x.isNullable;
 
                 var cSharpPropertyTypeName = GetDataTypeInDotnet(dataType, isNullable);
 
@@ -384,7 +414,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                     }
                 }
 
-                var item = new CustomSqlInfoParameter
+                return new CustomSqlInfoParameter
                 {
                     Name                             = name,
                     IsNullable                       = isNullable,
@@ -393,42 +423,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                     SqlDbTypeName                    = sqlDbTypeName,
                     ValueAccessPathForAddInParameter = valueAccessPathForAddInParameter
                 };
-
-                items.Add(item);
-            }
-
-
-           
-
-            return items;
-        }
-
-        /// <summary>
-        ///     Reads the result columns.
-        /// </summary>
-        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database)
-        {
-            var items = new List<CustomSqlInfoResult>();
-
-            database.CommandText = $"select resultid,datatype, nullableflag from dbo.objectresults WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
-
-            var reader = database.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var item = new CustomSqlInfoResult
-                {
-                    Name       = reader["resultid"].ToString(),
-                    DataType   = reader["datatype"].ToString(),
-                    IsNullable = reader["nullableflag"] + string.Empty == "1"
-                };
-
-                items.Add(item);
-            }
-
-            reader.Close();
-
-            return items;
+            });
         }
 
         /// <summary>
@@ -451,5 +446,14 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             return items;
         }
         #endregion
+
+        internal class ObjectParameterInfo
+        {
+            #region Public Properties
+            public string dataType   { get; set; }
+            public bool   isNullable { get; set; }
+            public string name       { get; set; }
+            #endregion
+        }
     }
 }
