@@ -447,6 +447,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         }
         #endregion
 
+        [Serializable]
         internal class ObjectParameterInfo
         {
             #region Public Properties
