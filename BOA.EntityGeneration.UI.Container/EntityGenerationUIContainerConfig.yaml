@@ -25,6 +25,7 @@ ProfileNames:
   - CreditCardIssuing,
   - CreditCardStatementBatch
   - CreditCardTransaction
+  - EMB_BATCH
   - '*'
 SchemaNames:
   - BKM

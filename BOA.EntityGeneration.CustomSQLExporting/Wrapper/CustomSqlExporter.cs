@@ -23,6 +23,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #region Public Methods
         public void Export(string profileId)
         {
+            if (profileId == "EMB_BATCH")
+            {
+                profileId = "EmbossingBatch";
+            }
+
             Context.ProfileName = profileId;
 
             // initialize Naming Map
@@ -42,7 +47,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 "CreditCardLifecycle",
                 "CreditCardIssuing",
                 "CreditCardStatementBatch",
-                "CreditCardTransaction"
+                "CreditCardTransaction",
+                "EmbossingBatch"
             };
 
             if (newNaming.Contains(profileId))
