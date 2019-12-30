@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using BOA.Collections;
 using BOA.EntityGeneration.CustomSQLExporting.Models;
 using DotNetDatabaseAccessUtilities;
@@ -40,6 +41,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.ContextManagement
         public ReferencedEntityTypeNamingPatternContract ReferencedEntityTypeNamingPattern { get; set; }
         public AddOnlyList<string>                       RepositoryAssemblyReferences      { get; } = new AddOnlyList<string>();
         public AddOnlyList<string>                       RepositoryProjectSourceFileNames  { get; } = new AddOnlyList<string>();
+        public IDbConnection Connection { get; set; }
         #endregion
 
         #region CustomSqlInfoInitialized

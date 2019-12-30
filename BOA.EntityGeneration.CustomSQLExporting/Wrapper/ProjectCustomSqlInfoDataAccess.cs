@@ -31,8 +31,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     public class GetCustomSqlInfoInput
     {
         #region Constructors
-        public GetCustomSqlInfoInput(IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
+        public GetCustomSqlInfoInput(IDbConnection contextConnection, IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
         {
+            ContextConnection = contextConnection;
             Database        = database;
             ProfileId       = profileId;
             Id              = id;
@@ -44,6 +45,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #region Public Properties
         public CustomSqlExporterConfig Config { get; set; }
 
+        public IDbConnection ContextConnection { get; }
         public IDatabase Database        { get; set; }
         public string    Id              { get; set; }
         public string    ProfileId       { get; set; }
@@ -98,19 +100,19 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #endregion
 
         #region Methods
-        internal static CustomSqlInfo ReadFromDatabase(GetCustomSqlInfoInput customSqlInfoInput)
+        internal static CustomSqlInfo ReadFromDatabase(GetCustomSqlInfoInput input)
         {
             var customSqlInfo = new CustomSqlInfo
             {
-                Name      = customSqlInfoInput.Id,
-                ProfileId = customSqlInfoInput.ProfileId
+                Name      = input.Id,
+                ProfileId = input.ProfileId
             };
 
-            customSqlInfoInput.Database.CommandText                           = customSqlInfoInput.Config.CustomSQL_Get_SQL_Item_Info;
-            customSqlInfoInput.Database[nameof(customSqlInfoInput.ProfileId)] = customSqlInfoInput.ProfileId;
-            customSqlInfoInput.Database[nameof(customSqlInfoInput.Id)]        = customSqlInfoInput.Id;
+            input.Database.CommandText                           = input.Config.CustomSQL_Get_SQL_Item_Info;
+            input.Database[nameof(input.ProfileId)] = input.ProfileId;
+            input.Database[nameof(input.Id)]        = input.Id;
 
-            var reader = customSqlInfoInput.Database.ExecuteReader();
+            var reader = input.Database.ExecuteReader();
             while (reader.Read())
             {
                 customSqlInfo.Sql                   = reader[nameof(CustomSqlInfo.Sql)] + string.Empty;
@@ -121,6 +123,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             }
 
             reader.Close();
+
+            
 
             return customSqlInfo;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
 using BOA.EntityGeneration.CustomSQLExporting.ContextManagement;
@@ -80,7 +81,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ProcessInfo.Text    = $"Processing '{objectId}'";
                 ProcessInfo.Current = switchCaseIndex;
 
-                Context.CustomSqlInfo = ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(new GetCustomSqlInfoInput(Database, profileId_not_Changed, objectId, Config, switchCaseIndex++));
+                Context.CustomSqlInfo = ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(new GetCustomSqlInfoInput(Context.Connection,Database, profileId_not_Changed, objectId, Config, switchCaseIndex++));
 
                 InitializeCustomSqlNamingPattern();
 
@@ -167,6 +168,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
         void InitializeDatabaseConnection()
         {
+            Context.Connection = new SqlConnection(Config.ConnectionString);
+
             Context.Database = new SqlDatabase(Config.ConnectionString) {CommandTimeout = 1000 * 60 * 60};
         }
         #endregion
