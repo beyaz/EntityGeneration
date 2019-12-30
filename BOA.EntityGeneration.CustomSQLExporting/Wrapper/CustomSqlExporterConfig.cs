@@ -22,12 +22,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         ///     Gets or sets the connection string.
         /// </summary>
         public string ConnectionString { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the custom SQL get SQL item information.
-        /// </summary>
-        public string CustomSQL_Get_SQL_Item_Info { get; set; }
-
+        
         /// <summary>
         ///     Gets or sets the custom SQL names defined to profile SQL.
         /// </summary>

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using BOA.EntityGeneration.CustomSQLExporting.Models;
 using BOA.EntityGeneration.DbModel;
+using Dapper;
 using DotNetDatabaseAccessUtilities;
 using DotNetStringUtilities;
 
@@ -31,9 +32,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     public class GetCustomSqlInfoInput
     {
         #region Constructors
-        public GetCustomSqlInfoInput(IDbConnection contextConnection, IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
+        public GetCustomSqlInfoInput(IDbConnection connection, IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
         {
-            ContextConnection = contextConnection;
+            Connection      = connection;
             Database        = database;
             ProfileId       = profileId;
             Id              = id;
@@ -45,11 +46,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #region Public Properties
         public CustomSqlExporterConfig Config { get; set; }
 
-        public IDbConnection ContextConnection { get; }
-        public IDatabase Database        { get; set; }
-        public string    Id              { get; set; }
-        public string    ProfileId       { get; set; }
-        public int       SwitchCaseIndex { get; set; }
+        public IDbConnection Connection      { get; }
+        public IDatabase     Database        { get; set; }
+        public string        Id              { get; set; }
+        public string        ProfileId       { get; set; }
+        public int           SwitchCaseIndex { get; set; }
         #endregion
     }
 
@@ -59,13 +60,13 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     public class ProjectCustomSqlInfoDataAccess
     {
         #region Public Methods
-        public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput customSqlInfoInput)
+        public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput input)
         {
-            var customSqlInfo = ReadFromDatabase(customSqlInfoInput);
+            var customSqlInfo = ReadFromDatabase(input);
 
-            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, customSqlInfoInput.Database);
+            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, input.Database,input.Connection);
 
-            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, customSqlInfoInput.Database);
+            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, input.Database);
 
             if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
                 customSqlInfo.ResultColumns.Count == 1)
@@ -75,7 +76,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             Fill(customSqlInfo);
 
-            customSqlInfo.SwitchCaseIndex = customSqlInfoInput.SwitchCaseIndex;
+            customSqlInfo.SwitchCaseIndex = input.SwitchCaseIndex;
 
             return customSqlInfo;
         }
@@ -102,53 +103,43 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #region Methods
         internal static CustomSqlInfo ReadFromDatabase(GetCustomSqlInfoInput input)
         {
-            var customSqlInfo = new CustomSqlInfo
-            {
-                Name      = input.Id,
-                ProfileId = input.ProfileId
-            };
+            var profileId = input.ProfileId;
+            var objectId  = input.Id;
 
-            input.Database.CommandText                           = input.Config.CustomSQL_Get_SQL_Item_Info;
-            input.Database[nameof(input.ProfileId)] = input.ProfileId;
-            input.Database[nameof(input.Id)]        = input.Id;
-
-            var reader = input.Database.ExecuteReader();
-            while (reader.Read())
-            {
-                customSqlInfo.Sql                   = reader[nameof(CustomSqlInfo.Sql)] + string.Empty;
-                customSqlInfo.SchemaName            = reader[nameof(CustomSqlInfo.SchemaName)] + string.Empty;
-                customSqlInfo.SqlResultIsCollection = Convert.ToBoolean(reader[nameof(CustomSqlInfo.SqlResultIsCollection)]);
-
-                break;
-            }
-
-            reader.Close();
-
-            
+            var customSqlInfo = input.Connection.QuerySingle<CustomSqlInfo>(@"
+    SELECT text AS Sql, 
+           schemaname AS SchemaName, 
+           CAST(resultcollectionflag AS INT) AS SqlResultIsCollection,
+           @objectId AS [Name],
+           @profileId AS ProfileId
+      FROM dbo.objects WITH (NOLOCK)
+     WHERE objecttype = 'CUSTOMSQL' 
+       AND profileid  = @profileId 
+       AND objectid   = @objectId
+", new {profileId, objectId});
 
             return customSqlInfo;
         }
 
-        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, IDatabase database)
+        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, 
+                                                                                           IDatabase database,
+                                                                                           IDbConnection connection)
         {
-            var items = new List<ObjectParameterInfo>();
 
-            database.CommandText = $"select parameterid,datatype,nullableflag from dbo.objectparameters WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
+            var profileId = customSqlInfo.ProfileId;
+            var objectId  = customSqlInfo.Name;
 
-            var reader = database.ExecuteReader();
-            while (reader.Read())
-            {
-                items.Add(new ObjectParameterInfo
-                {
-                    name       = reader["parameterid"].ToString(),
-                    dataType   = reader["datatype"].ToString(),
-                    isNullable = reader["nullableflag"] + string.Empty == "1"
-                });
-            }
+            var query = $@"
+SELECT parameterid AS [Name],
+       datatype,
+       CAST(nullableflag as BIT) as [isNullable]
+  from dbo.objectparameters WITH (NOLOCK) 
+ WHERE profileid = @{nameof(profileId)}
+  AND objectid   = @{nameof(objectId)}";
 
-            reader.Close();
+            return connection.Query<ObjectParameterInfo>(query, new {profileId, objectId}).ToList();
 
-            return items;
+            
         }
 
         /// <summary>
@@ -160,7 +151,6 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             database.CommandText = $"select resultid,datatype, nullableflag from dbo.objectresults WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
 
-            
             var reader = database.ExecuteReader();
 
             while (reader.Read())
@@ -383,9 +373,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         /// <summary>
         ///     Reads the input parameters.
         /// </summary>
-        static IReadOnlyList<CustomSqlInfoParameter> ReadInputParameters(CustomSqlInfo customSqlInfo, IDatabase database)
+        static IReadOnlyList<CustomSqlInfoParameter> ReadInputParameters(CustomSqlInfo customSqlInfo, IDatabase database, IDbConnection connection)
         {
-            var list = ReadInputParametersFromDatabase(customSqlInfo, database);
+            var list = ReadInputParametersFromDatabase(customSqlInfo, database,connection);
 
             return list.ToList().ConvertAll(x =>
             {
