@@ -66,7 +66,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, input.Database,input.Connection);
 
-            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, input.Database);
+            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, input.Database,input.Connection);
 
             if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
                 customSqlInfo.ResultColumns.Count == 1)
@@ -145,29 +145,24 @@ SELECT parameterid AS [Name],
         /// <summary>
         ///     Reads the result columns.
         /// </summary>
-        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database)
+        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database, IDbConnection connection)
         {
-            var items = new List<CustomSqlInfoResult>();
 
-            database.CommandText = $"select resultid,datatype, nullableflag from dbo.objectresults WITH (NOLOCK) WHERE profileid = '{customSqlInfo.ProfileId}' AND objectid = '{customSqlInfo.Name}'";
 
-            var reader = database.ExecuteReader();
 
-            while (reader.Read())
-            {
-                var item = new CustomSqlInfoResult
-                {
-                    Name       = reader["resultid"].ToString(),
-                    DataType   = reader["datatype"].ToString(),
-                    IsNullable = reader["nullableflag"] + string.Empty == "1"
-                };
+            var profileId = customSqlInfo.ProfileId;
+            var objectId  = customSqlInfo.Name;
 
-                items.Add(item);
-            }
+            var query = $@"
+SELECT resultid                  AS [Name],
+       datatype                  AS [DataType],
+       CAST(nullableflag as BIT) AS [IsNullable]
+  from dbo.objectresults WITH (NOLOCK) 
+ WHERE profileid = @{nameof(profileId)}
+  AND objectid   = @{nameof(objectId)}";
 
-            reader.Close();
-
-            return items;
+            return connection.Query<CustomSqlInfoResult>(query, new {profileId, objectId}).ToList();
+            
         }
 
         /// <summary>

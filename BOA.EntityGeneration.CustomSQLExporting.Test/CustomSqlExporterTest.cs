@@ -118,7 +118,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting
                 context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadFromDatabase(It.IsAny<GetCustomSqlInfoInput>())).Returns(customSqlInfo);
 
                 context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadInputParametersFromDatabase(It.IsAny<CustomSqlInfo>(), It.IsAny<IDatabase>(),It.IsAny<IDbConnection>())).Returns(inputParameters);
-                context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadResultColumns(It.IsAny<CustomSqlInfo>(), It.IsAny<IDatabase>())).Returns(resultColumns);
+                context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadResultColumns(It.IsAny<CustomSqlInfo>(), It.IsAny<IDatabase>(),It.IsAny<IDbConnection>())).Returns(resultColumns);
 
                 exporter.Export("Xyz");
 
