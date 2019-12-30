@@ -135,7 +135,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.SharedFileE
                 file.AppendLine();
                 foreach (var columnInfo in sqlParameters)
                 {
-                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {columnInfo.ColumnName.AsMethodParameter()});");
+                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {GetValueAccessPath(columnInfo)});");
                 }
             }
 
@@ -143,6 +143,23 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.SharedFileE
             file.AppendLine("return sqlInfo;");
 
             file.CloseBracket();
+        }
+
+        static string GetValueAccessPath(IColumnInfo columnInfo)
+        {
+            var valueAccess = columnInfo.ColumnName.AsMethodParameter();
+
+            if (columnInfo.SqlReaderMethod== SqlReaderMethods.GetBooleanValueFromChar)
+            {
+                return valueAccess + " ? \"1\" : \"0\"";
+            }
+
+            if (columnInfo.SqlReaderMethod== SqlReaderMethods.GetBooleanNullableValueFromChar)
+            {
+                return valueAccess + " == true ? \"1\" : \"0\"";
+            }
+
+            return valueAccess;
         }
 
         void WriteEmbeddedClasses()
@@ -180,7 +197,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.SharedFileE
                 file.AppendLine();
                 foreach (var columnInfo in sqlParameters)
                 {
-                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {ParameterHelper.GetValueForSqlInsert(columnInfo)});");
+                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {ParameterHelper.GetValueForSqlInfoParameter(columnInfo)});");
                 }
             }
 
@@ -290,7 +307,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.SharedFileE
                     file.AppendLine();
                     foreach (var columnInfo in indexInfo.SqlParameters)
                     {
-                        file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {columnInfo.ColumnName.AsMethodParameter()});");
+                        file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {GetValueAccessPath(columnInfo)});");
                     }
                 }
 
@@ -324,7 +341,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.SharedFileE
                 file.AppendLine();
                 foreach (var columnInfo in sqlParameters)
                 {
-                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {columnInfo.ColumnName.AsMethodParameter()});");
+                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {GetValueAccessPath(columnInfo)});");
                 }
             }
 
@@ -358,7 +375,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.SharedFileE
                 file.AppendLine();
                 foreach (var columnInfo in sqlParameters)
                 {
-                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {ParameterHelper.GetValueForSqlUpdate(columnInfo)});");
+                    file.AppendLine($"sqlInfo.AddInParameter(\"@{columnInfo.ColumnName}\", SqlDbType.{columnInfo.SqlDbType}, {ParameterHelper.GetValueForSqlInfoParameter(columnInfo)});");
                 }
             }
 
