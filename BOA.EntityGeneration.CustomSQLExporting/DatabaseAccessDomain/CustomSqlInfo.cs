@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
-using DotNetDatabaseAccessUtilities;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
 {
@@ -32,53 +31,36 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
 
             return customSqlInfo;
         }
-        #endregion
 
-
-
-        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, 
-                                                                                           IDatabase     database,
-                                                                                           IDbConnection connection)
+        public IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase()
         {
-
-            var profileId = customSqlInfo.ProfileId;
-            var objectId  = customSqlInfo.Name;
-
             var query = $@"
 SELECT parameterid AS [Name],
        datatype,
        CAST(nullableflag as BIT) as [isNullable]
   from dbo.objectparameters WITH (NOLOCK) 
- WHERE profileid = @{nameof(profileId)}
-  AND objectid   = @{nameof(objectId)}";
+ WHERE profileid = @{nameof(ProfileId)}
+  AND objectid   = @{nameof(ObjectId)}";
 
-            return connection.Query<ObjectParameterInfo>(query, new {profileId, objectId}).ToList();
-
-            
+            return Connection.Query<ObjectParameterInfo>(query, new {ProfileId, ObjectId}).ToList();
         }
 
         /// <summary>
         ///     Reads the result columns.
         /// </summary>
-        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database, IDbConnection connection)
+        public IReadOnlyList<CustomSqlInfoResult> ReadResultColumns()
         {
-
-
-
-            var profileId = customSqlInfo.ProfileId;
-            var objectId  = customSqlInfo.Name;
-
             var query = $@"
 SELECT resultid                  AS [Name],
        datatype                  AS [DataType],
        CAST(nullableflag as BIT) AS [IsNullable]
   from dbo.objectresults WITH (NOLOCK) 
- WHERE profileid = @{nameof(profileId)}
-  AND objectid   = @{nameof(objectId)}";
+ WHERE profileid = @{nameof(ProfileId)}
+  AND objectid   = @{nameof(ObjectId)}";
 
-            return connection.Query<CustomSqlInfoResult>(query, new {profileId, objectId}).ToList();
-            
+            return Connection.Query<CustomSqlInfoResult>(query, new {ProfileId, ObjectId}).ToList();
         }
+        #endregion
     }
 
     /// <summary>
@@ -135,27 +117,14 @@ SELECT resultid                  AS [Name],
         public string DataType { get; set; }
 
         /// <summary>
-        ///     Gets or sets the data type in dotnet.
-        /// </summary>
-        public string DataTypeInDotnet { get; set; }
-
-        /// <summary>
         ///     Gets or sets a value indicating whether this instance is nullable.
         /// </summary>
         public bool IsNullable { get; set; }
-
-        public bool IsReferenceToEntity => DataType?.Equals("object", StringComparison.OrdinalIgnoreCase) == true;
 
         /// <summary>
         ///     Gets or sets the name.
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the name in dotnet.
-        /// </summary>
-        public string NameInDotnet { get; set; }
-
         #endregion
     }
 }

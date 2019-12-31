@@ -27,6 +27,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
 
             customSqlInfo.Should().NotBeNull();
             customSqlInfo.Sql.Should().NotBeNullOrWhiteSpace();
+
+            databaseReader.ReadInputParametersFromDatabase().Count.Should().BeGreaterThan(0);
+            databaseReader.ReadInputParametersFromDatabase().Count.Should().BeGreaterThan(0);
         }
         #endregion
     }
