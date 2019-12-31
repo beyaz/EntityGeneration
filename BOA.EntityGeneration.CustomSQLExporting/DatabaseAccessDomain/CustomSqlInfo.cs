@@ -35,7 +35,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
 
         public  IReadOnlyList<string> GetCustomSqlNamesInfProfile()
         {
-            var sql = "SELECT objectid AS Id FROM dbo.objects WITH (NOLOCK) WHERE profileid = @ProfileId AND objecttype = 'CUSTOMSQL'";
+            const string sql = "SELECT objectid AS Id FROM dbo.objects WITH (NOLOCK) WHERE profileid = @ProfileId AND objecttype = 'CUSTOMSQL'";
 
             return Connection.Query<string>(sql, new {ProfileId}).ToList();
         }
@@ -62,9 +62,10 @@ SELECT parameterid AS [Name],
 SELECT resultid                  AS [Name],
        datatype                  AS [DataType],
        CAST(nullableflag as BIT) AS [IsNullable]
-  from dbo.objectresults WITH (NOLOCK) 
+  from dbo.objectresults WITH (NOLOCK)
  WHERE profileid = @{nameof(ProfileId)}
-  AND objectid   = @{nameof(ObjectId)}";
+  AND objectid   = @{nameof(ObjectId)}
+ORDER BY [Name]";
 
             return Connection.Query<CustomSqlInfoResult>(query, new {ProfileId, ObjectId}).ToList();
         }

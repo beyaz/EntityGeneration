@@ -29,8 +29,6 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ProfileId = profileId
             };
 
-            var profileId_not_Changed = profileId;
-
             if (profileId == "EMB_BATCH")
             {
                 profileId = "EmbossingBatch";
@@ -90,7 +88,16 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ProcessInfo.Current = switchCaseIndex;
 
                 Context.CurrentObjectId = objectId;
-                Context.CustomSqlInfo = ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(new GetCustomSqlInfoInput(Context.Connection,Database, profileId_not_Changed, objectId, Config, switchCaseIndex++));
+
+                var projectCustomSqlInfoDataAccess = new ProjectCustomSqlInfoDataAccess
+                {
+                    ProfileId       = Context.Input.ProfileId,
+                    Connection      = Context.Connection,
+                    ObjectId        = objectId,
+                    SwitchCaseIndex = switchCaseIndex++
+                };
+
+                Context.CustomSqlInfo = projectCustomSqlInfoDataAccess.GetCustomSqlInfo();
 
                 InitializeCustomSqlNamingPattern();
 

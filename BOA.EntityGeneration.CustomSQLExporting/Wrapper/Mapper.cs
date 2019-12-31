@@ -1,20 +1,14 @@
 ﻿using BOA.EntityGeneration.CustomSQLExporting.ContextManagement;
 using BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain;
+using CustomSqlInfo = BOA.EntityGeneration.CustomSQLExporting.Models.CustomSqlInfo;
+using CustomSqlInfoResult = BOA.EntityGeneration.CustomSQLExporting.Models.CustomSqlInfoResult;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 {
     static class Mapper
     {
         #region Public Methods
-        public static ProjectCustomSqlInfoDataAccess CreateCustomSqlInfoDataAccess(this Context source)
-        {
-            return new ProjectCustomSqlInfoDataAccess
-            {
-                Connection = source.Connection,
-                ProfileId  = source.Input.ProfileId,
-                ObjectId   = source.CurrentObjectId
-            };
-        }
+       
 
         public static DatabaseReader CreateDatabaseReader(this Context source)
         {
@@ -25,6 +19,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ObjectId   = source.CurrentObjectId
             };
         }
+
         public static DatabaseReader CreateDatabaseReader(this ProjectCustomSqlInfoDataAccess source)
         {
             return new DatabaseReader
@@ -34,7 +29,28 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ObjectId   = source.ObjectId
             };
         }
-        
+
+        public static CustomSqlInfo ToCustomSqlInfo(this DatabaseAccessDomain.CustomSqlInfo source)
+        {
+            return new CustomSqlInfo
+            {
+                Name                  = source.Name,
+                ProfileId             = source.ProfileId,
+                SchemaName            = source.SchemaName,
+                Sql                   = source.Sql,
+                SqlResultIsCollection = source.SqlResultIsCollection
+            };
+        }
+
+        public static CustomSqlInfoResult ToCustomSqlInfoResult(this DatabaseAccessDomain.CustomSqlInfoResult source)
+        {
+            return new CustomSqlInfoResult
+            {
+                DataType   = source.DataType,
+                IsNullable = source.IsNullable,
+                Name       = source.Name
+            };
+        }
         #endregion
     }
 }

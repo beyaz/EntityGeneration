@@ -4,59 +4,32 @@ using System.Data;
 using System.Linq;
 using BOA.EntityGeneration.CustomSQLExporting.Models;
 using BOA.EntityGeneration.DbModel;
-using Dapper;
-using DotNetDatabaseAccessUtilities;
 using DotNetStringUtilities;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 {
-   
-
-    
-
-    public class GetCustomSqlInfoInput
-    {
-        #region Constructors
-        public GetCustomSqlInfoInput(IDbConnection connection, IDatabase database, string profileId, string id, CustomSqlExporterConfig config, int switchCaseIndex)
-        {
-            Connection      = connection;
-            Database        = database;
-            ProfileId       = profileId;
-            Id              = id;
-            Config          = config;
-            SwitchCaseIndex = switchCaseIndex;
-        }
-        #endregion
-
-        #region Public Properties
-        public CustomSqlExporterConfig Config { get; set; }
-
-        public IDbConnection Connection      { get; }
-        public IDatabase     Database        { get; set; }
-        public string        Id              { get; set; }
-        public string        ProfileId       { get; set; }
-        public int           SwitchCaseIndex { get; set; }
-        #endregion
-    }
-
     /// <summary>
     ///     The project custom SQL information data access
     /// </summary>
     public class ProjectCustomSqlInfoDataAccess
     {
-        public IDbConnection Connection { get; set; }
-        public string        ObjectId   { get; set; }
-        public string        ProfileId  { get; set; }
+        #region Public Properties
+        public IDbConnection Connection      { get; set; }
+        public string        ObjectId        { get; set; }
+        public string        ProfileId       { get; set; }
+        public int           SwitchCaseIndex { get; set; }
+        #endregion
 
-        
         #region Public Methods
-        public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput input)
+        public CustomSqlInfo GetCustomSqlInfo()
         {
-            var customSqlInfo = ReadFromDatabase(input);
+            var databaseReader = this.CreateDatabaseReader();
 
-            customSqlInfo.Parameters = ReadInputParameters(customSqlInfo, input.Database,input.Connection);
+            var customSqlInfo = databaseReader.ReadCustomSqlInfo().ToCustomSqlInfo();
 
-            customSqlInfo.ResultColumns = ReadResultColumns(customSqlInfo, input.Database,input.Connection);
+            customSqlInfo.Parameters = ReadInputParameters();
+
+            customSqlInfo.ResultColumns = databaseReader.ReadResultColumns().Select(Mapper.ToCustomSqlInfoResult).ToList();
 
             if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
                 customSqlInfo.ResultColumns.Count == 1)
@@ -66,78 +39,13 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             Fill(customSqlInfo);
 
-            customSqlInfo.SwitchCaseIndex = input.SwitchCaseIndex;
+            customSqlInfo.SwitchCaseIndex = SwitchCaseIndex;
 
             return customSqlInfo;
         }
-
         #endregion
 
         #region Methods
-        internal static CustomSqlInfo ReadFromDatabase(GetCustomSqlInfoInput input)
-        {
-            var profileId = input.ProfileId;
-            var objectId  = input.Id;
-
-            var customSqlInfo = input.Connection.QuerySingle<CustomSqlInfo>(@"
-    SELECT text AS Sql, 
-           schemaname AS SchemaName, 
-           CAST(resultcollectionflag AS INT) AS SqlResultIsCollection,
-           @objectId AS [Name],
-           @profileId AS ProfileId
-      FROM dbo.objects WITH (NOLOCK)
-     WHERE objecttype = 'CUSTOMSQL' 
-       AND profileid  = @profileId 
-       AND objectid   = @objectId
-", new {profileId, objectId});
-
-            return customSqlInfo;
-        }
-
-        internal static IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase(CustomSqlInfo customSqlInfo, 
-                                                                                           IDatabase database,
-                                                                                           IDbConnection connection)
-        {
-
-            var profileId = customSqlInfo.ProfileId;
-            var objectId  = customSqlInfo.Name;
-
-            var query = $@"
-SELECT parameterid AS [Name],
-       datatype,
-       CAST(nullableflag as BIT) as [isNullable]
-  from dbo.objectparameters WITH (NOLOCK) 
- WHERE profileid = @{nameof(profileId)}
-  AND objectid   = @{nameof(objectId)}";
-
-            return connection.Query<ObjectParameterInfo>(query, new {profileId, objectId}).ToList();
-
-            
-        }
-
-        /// <summary>
-        ///     Reads the result columns.
-        /// </summary>
-        internal static IReadOnlyList<CustomSqlInfoResult> ReadResultColumns(CustomSqlInfo customSqlInfo, IDatabase database, IDbConnection connection)
-        {
-
-
-
-            var profileId = customSqlInfo.ProfileId;
-            var objectId  = customSqlInfo.Name;
-
-            var query = $@"
-SELECT resultid                  AS [Name],
-       datatype                  AS [DataType],
-       CAST(nullableflag as BIT) AS [IsNullable]
-  from dbo.objectresults WITH (NOLOCK) 
- WHERE profileid = @{nameof(profileId)}
-  AND objectid   = @{nameof(objectId)}";
-
-            return connection.Query<CustomSqlInfoResult>(query, new {profileId, objectId}).ToList();
-            
-        }
-
         /// <summary>
         ///     Fills the specified custom SQL information.
         /// </summary>
@@ -341,9 +249,9 @@ SELECT resultid                  AS [Name],
         /// <summary>
         ///     Reads the input parameters.
         /// </summary>
-        static IReadOnlyList<CustomSqlInfoParameter> ReadInputParameters(CustomSqlInfo customSqlInfo, IDatabase database, IDbConnection connection)
+        IReadOnlyList<CustomSqlInfoParameter> ReadInputParameters()
         {
-            var list = ReadInputParametersFromDatabase(customSqlInfo, database,connection);
+            var list = this.CreateDatabaseReader().ReadInputParametersFromDatabase();
 
             return list.ToList().ConvertAll(x =>
             {
@@ -387,36 +295,6 @@ SELECT resultid                  AS [Name],
                 };
             });
         }
-
-        /// <summary>
-        ///     Gets the by profile identifier list.
-        /// </summary>
-        IReadOnlyList<string> GetByProfileIdList(IDatabase database)
-        {
-            var items = new List<string>();
-
-            database.CommandText = "SELECT profileid  from BOACard.dbo.profileskt WITH (NOLOCK)";
-            var reader = database.ExecuteReader();
-            while (reader.Read())
-
-            {
-                items.Add(reader["profileid"] + string.Empty);
-            }
-
-            reader.Close();
-
-            return items;
-        }
         #endregion
-
-        [Serializable]
-        internal class ObjectParameterInfo
-        {
-            #region Public Properties
-            public string dataType   { get; set; }
-            public bool   isNullable { get; set; }
-            public string name       { get; set; }
-            #endregion
-        }
     }
 }
