@@ -178,6 +178,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
                 return DotNetTypeName.DotNetByte + suffix;
             }
 
+            if (DotNetTypeName.DotNetTimeSpan.Equals(dataType, StringComparison.OrdinalIgnoreCase))
+            {
+                return DotNetTypeName.DotNetTimeSpan + suffix;
+            }
+
             throw new NotImplementedException(dataType);
         }
 

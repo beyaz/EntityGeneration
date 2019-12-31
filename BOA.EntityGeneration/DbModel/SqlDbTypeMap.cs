@@ -419,6 +419,16 @@ namespace BOA.EntityGeneration.DbModel
                 return isNullable ? SqlReaderMethods.GetDecimalNullableValue : SqlReaderMethods.GetDecimalValue;
             }
 
+            if (dataType.Equals(DotNetTypeName.DotNetTimeSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                //if (isNullable)
+                //{
+                //    throw new ArgumentException("Timespan column can not be null.");
+                //}
+
+                return SqlReaderMethods.GetTimeSpanValue;
+            }
+
             throw new ArgumentException(dataType);
         }
         #endregion
