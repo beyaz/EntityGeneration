@@ -31,6 +31,14 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
 
             return customSqlInfo;
         }
+        
+
+        public  IReadOnlyList<string> GetCustomSqlNamesInfProfile()
+        {
+            var sql = "SELECT objectid AS Id FROM dbo.objects WITH (NOLOCK) WHERE profileid = @ProfileId AND objecttype = 'CUSTOMSQL'";
+
+            return Connection.Query<string>(sql, new {ProfileId}).ToList();
+        }
 
         public IReadOnlyList<ObjectParameterInfo> ReadInputParametersFromDatabase()
         {
