@@ -6,10 +6,17 @@ using DotNetDatabaseAccessUtilities;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.ContextManagement
 {
+    [Serializable]
+    public class Input
+    {
+        public string ProfileId { get; set; }
+        public string ObjectId  { get; set; }
+    }
+
     class Context
     {
 
-        
+        public Input Input { get; set; }
 
         #region Fields
         public readonly AddOnlyList<string> EntityAssemblyReferences = new AddOnlyList<string>();

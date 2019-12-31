@@ -29,6 +29,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #endregion
     }
 
+    
+
     public class GetCustomSqlInfoInput
     {
         #region Constructors
