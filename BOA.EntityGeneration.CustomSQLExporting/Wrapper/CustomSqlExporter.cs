@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
@@ -110,24 +109,6 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             ProcessInfo.Text = "Finished Successfully.";
 
             WaitTwoSecondForUserCanSeeSuccessMessage();
-        }
-
-        public IReadOnlyList<string> GetProfileNames()
-        {
-            var profileIdList = new List<string>();
-
-            Database.CommandText = Config.SQL_GetProfileIdList;
-            var reader = Database.ExecuteReader();
-            while (reader.Read())
-            {
-                profileIdList.Add(reader["ProfileId"].ToString());
-            }
-
-            reader.Close();
-
-            profileIdList.Add("*");
-
-            return profileIdList;
         }
 
         public void InitializeContext()
