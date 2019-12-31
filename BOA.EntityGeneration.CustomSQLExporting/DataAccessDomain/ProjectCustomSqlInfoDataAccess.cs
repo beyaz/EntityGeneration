@@ -6,7 +6,7 @@ using BOA.EntityGeneration.CustomSQLExporting.Models;
 using BOA.EntityGeneration.DbModel;
 using DotNetStringUtilities;
 
-namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
+namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
 {
     /// <summary>
     ///     The project custom SQL information data access

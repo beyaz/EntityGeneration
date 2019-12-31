@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
 using BOA.EntityGeneration.CustomSQLExporting.ContextManagement;
+using BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain;
 using BOA.EntityGeneration.CustomSQLExporting.Exporters.AllInOneClassRepositoryExporting;
 using BOA.EntityGeneration.CustomSQLExporting.Exporters.BoaRepositoryExporting;
 using BOA.EntityGeneration.CustomSQLExporting.Exporters.CsprojEntityExporting;
