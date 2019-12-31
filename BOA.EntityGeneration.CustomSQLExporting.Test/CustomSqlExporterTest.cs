@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using BOA.EntityGeneration.CustomSQLExporting.Models;
+using BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain;
 using BOA.EntityGeneration.CustomSQLExporting.Wrapper;
 using DotNetDatabaseAccessUtilities;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Smocks;
 using Smocks.Matching;
+using CustomSqlInfo = BOA.EntityGeneration.CustomSQLExporting.Models.CustomSqlInfo;
+using CustomSqlInfoResult = BOA.EntityGeneration.CustomSQLExporting.Models.CustomSqlInfoResult;
 
 namespace BOA.EntityGeneration.CustomSQLExporting
 {
@@ -113,7 +115,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting
                     Name = "Abc"
                 };
 
-                context.Setup(() => ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(It.IsAny<GetCustomSqlNamesInfProfileInput>())).Returns(new List<string> {string.Empty});
+                context.Setup(() => It.IsAny<DatabaseReader>().GetCustomSqlNamesInfProfile()).Returns(new List<string> {string.Empty});
 
                 context.Setup(() => ProjectCustomSqlInfoDataAccess.ReadFromDatabase(It.IsAny<GetCustomSqlInfoInput>())).Returns(customSqlInfo);
 

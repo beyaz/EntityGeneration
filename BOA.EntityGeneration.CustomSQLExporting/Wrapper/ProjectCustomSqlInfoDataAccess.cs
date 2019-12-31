@@ -10,24 +10,7 @@ using DotNetStringUtilities;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 {
-    public class GetCustomSqlNamesInfProfileInput
-    {
-        #region Constructors
-        public GetCustomSqlNamesInfProfileInput(IDatabase database, string profileId, CustomSqlExporterConfig config)
-        {
-            Database  = database;
-            ProfileId = profileId;
-            Config    = config;
-        }
-        #endregion
-
-        #region Public Properties
-        public CustomSqlExporterConfig Config { get; set; }
-
-        public IDatabase Database  { get; set; }
-        public string    ProfileId { get; set; }
-        #endregion
-    }
+   
 
     
 
@@ -83,23 +66,6 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
             return customSqlInfo;
         }
 
-        public static IReadOnlyList<string> GetCustomSqlNamesInfProfile(GetCustomSqlNamesInfProfileInput customSqlNamesInfProfileInput)
-        {
-            var objectIdList = new List<string>();
-
-            customSqlNamesInfProfileInput.Database.CommandText                                      = customSqlNamesInfProfileInput.Config.CustomSQLNamesDefinedToProfileSql;
-            customSqlNamesInfProfileInput.Database[nameof(customSqlNamesInfProfileInput.ProfileId)] = customSqlNamesInfProfileInput.ProfileId;
-
-            var reader = customSqlNamesInfProfileInput.Database.ExecuteReader();
-            while (reader.Read())
-            {
-                objectIdList.Add(reader["Id"].ToString());
-            }
-
-            reader.Close();
-
-            return objectIdList;
-        }
         #endregion
 
         #region Methods

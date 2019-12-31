@@ -10,7 +10,6 @@ namespace BOA.EntityGeneration.CustomSQLExporting.ContextManagement
     public class Input
     {
         public string ProfileId { get; set; }
-        public string ObjectId  { get; set; }
     }
 
     class Context
@@ -49,6 +48,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.ContextManagement
         public AddOnlyList<string>                       RepositoryAssemblyReferences      { get; } = new AddOnlyList<string>();
         public AddOnlyList<string>                       RepositoryProjectSourceFileNames  { get; } = new AddOnlyList<string>();
         public IDbConnection Connection { get; set; }
+        public string CurrentObjectId { get; set; }
         #endregion
 
         #region CustomSqlInfoInitialized

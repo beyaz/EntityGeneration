@@ -24,6 +24,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         #region Public Methods
         public void Export(string profileId)
         {
+            Context.Input = new Input
+            {
+                ProfileId = profileId
+            };
+
             var profileId_not_Changed = profileId;
 
             if (profileId == "EMB_BATCH")
@@ -70,7 +75,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
 
             ProcessInfo.Text = "Fetching profile informations...";
 
-            var customSqlNamesInfProfile = ProjectCustomSqlInfoDataAccess.GetCustomSqlNamesInfProfile(new GetCustomSqlNamesInfProfileInput(Database, profileId_not_Changed, Config));
+
+            var customSqlNamesInfProfile = Context.CreateDatabaseReader().GetCustomSqlNamesInfProfile();
+
 
             Context.OnProfileInfoInitialized();
 
@@ -82,6 +89,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 ProcessInfo.Text    = $"Processing '{objectId}'";
                 ProcessInfo.Current = switchCaseIndex;
 
+                Context.CurrentObjectId = objectId;
                 Context.CustomSqlInfo = ProjectCustomSqlInfoDataAccess.GetCustomSqlInfo(new GetCustomSqlInfoInput(Context.Connection,Database, profileId_not_Changed, objectId, Config, switchCaseIndex++));
 
                 InitializeCustomSqlNamingPattern();

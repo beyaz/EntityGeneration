@@ -23,10 +23,6 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
         /// </summary>
         public string ConnectionString { get; set; }
         
-        /// <summary>
-        ///     Gets or sets the custom SQL names defined to profile SQL.
-        /// </summary>
-        public string CustomSQLNamesDefinedToProfileSql { get; set; }
 
         /// <summary>
         ///     Gets or sets the entity namespace.
