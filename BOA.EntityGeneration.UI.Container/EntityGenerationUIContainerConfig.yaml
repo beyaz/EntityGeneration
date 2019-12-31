@@ -25,6 +25,7 @@ ProfileNames:
   - CreditCardIssuing
   - CreditCardStatementBatch
   - CreditCardTransaction
+  - CreditCardLimit
   - EMB_BATCH
   - '*'
 SchemaNames:

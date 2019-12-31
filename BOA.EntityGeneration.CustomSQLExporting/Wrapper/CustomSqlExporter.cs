@@ -51,7 +51,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 "CreditCardIssuing",
                 "CreditCardStatementBatch",
                 "CreditCardTransaction",
-                "EmbossingBatch"
+                "EmbossingBatch",
+                "CreditCardLimit"
             };
 
             if (newNaming.Contains(profileId))
