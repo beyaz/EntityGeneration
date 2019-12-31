@@ -44,6 +44,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
     /// </summary>
     public class ProjectCustomSqlInfoDataAccess
     {
+        public IDbConnection Connection { get; set; }
+        public string        ObjectId   { get; set; }
+        public string        ProfileId  { get; set; }
+
+        
         #region Public Methods
         public static CustomSqlInfo GetCustomSqlInfo(GetCustomSqlInfoInput input)
         {
