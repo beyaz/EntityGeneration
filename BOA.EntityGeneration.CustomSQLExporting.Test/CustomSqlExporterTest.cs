@@ -21,15 +21,15 @@ namespace BOA.EntityGeneration.CustomSQLExporting
             {
                 new ObjectParameterInfo
                 {
-                    isNullable = true,
-                    dataType   = "bigint",
-                    name       = "aloha"
+                    IsNullable = true,
+                    DataType   = "bigint",
+                    Name       = "aloha"
                 },
                 new ObjectParameterInfo
                 {
-                    isNullable = true,
-                    dataType   = "char",
-                    name       = "my_FLAG"
+                    IsNullable = true,
+                    DataType   = "char",
+                    Name       = "my_FLAG"
                 }
             };
 
@@ -55,15 +55,15 @@ namespace BOA.EntityGeneration.CustomSQLExporting
             {
                 new ObjectParameterInfo
                 {
-                    isNullable = true,
-                    dataType   = "bigint",
-                    name       = "aloha"
+                    IsNullable = true,
+                    DataType   = "bigint",
+                    Name       = "aloha"
                 },
                 new ObjectParameterInfo
                 {
-                    isNullable = true,
-                    dataType   = "char",
-                    name       = "my_FLAG"
+                    IsNullable = true,
+                    DataType   = "char",
+                    Name       = "my_FLAG"
                 }
             };
 
