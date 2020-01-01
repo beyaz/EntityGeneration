@@ -1,16 +1,47 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 using BOA.EntityGeneration.CustomSQLExporting.ContextManagement;
+using BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedClassExporting;
 using BOA.EntityGeneration.DbModel;
 using BOA.EntityGeneration.ScriptModel;
 using DotNetStringUtilities;
 
-namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
+namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedClassExporting
 {
+    class SharedClassWriterSqlParameter
+    {
+        public string    Name                             { get; set; }
+        public SqlDbType SqlDbTypeName                    { get; set; }
+        public string    ValueAccessPathForAddInParameter { get; set; }
+    }
+    class SharedClassWriterResultColumn
+    {
+        public bool             IsReferenceToEntity { get; set; }
+        public string           NameInDotnet        { get; set; }
+        public SqlReaderMethods SqlReaderMethod     { get; set; }
+        public string           Name                { get; set; }
+    }
     class SharedClassWriter
     {
-        //public PaddedStringBuilder sb { get; set; }
+        public PaddedStringBuilder                          Output                             { get; set; }
+        public string                                       RepositoryClassName                { get; set; }
+        public string                                       InputClassName                     { get; set; }
+        public string                                       Sql                                { get; set; }
+        public IReadOnlyList<SharedClassWriterSqlParameter> SqlParameters                      { get; set; }
+        public bool                                         ResultContractIsReferencedToEntity { get; set; }
+        public string                                       Name                               { get; set; }
+        public string                                       ResultClassName                    { get; set; }
+        public IReadOnlyList<SharedClassWriterResultColumn> ResultColumns                      { get; set; }
+        public string                                       ReferencedEntityAccessPath, ReferencedEntityReaderMethodPath, ReferencedEntityAssemblyPath, ReferencedRepositoryAssemblyPath;
+        public Action<string>                               AddRepositoryAssemblyReference;
     }
+}
+namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
+{
+   
     class SharedFileExporter : ContextContainer
     {
         #region Static Fields
@@ -20,6 +51,27 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
         #region Fields
         readonly PaddedStringBuilder Output = new PaddedStringBuilder();
         #endregion
+
+        SharedClassWriter CreateNewSharedClassWriter()
+        {
+            return new SharedClassWriter
+            {
+                Output              = Output,
+                RepositoryClassName = NamingMap.RepositoryClassName,
+                InputClassName      = NamingMap.InputClassName,
+                Sql                 = CustomSqlInfo.Sql,
+                SqlParameters = CustomSqlInfo.Parameters.Select(x=>new SharedClassWriterSqlParameter
+                {
+                    Name                             = x.Name,
+                    SqlDbTypeName                    = x.SqlDbTypeName,
+                    ValueAccessPathForAddInParameter = x.ValueAccessPathForAddInParameter,
+                }).ToList(),
+
+                ResultContractIsReferencedToEntity = CustomSqlInfo.ResultContractIsReferencedToEntity,
+                Name                               = CustomSqlInfo.Name,
+                ResultClassName                    = NamingMap.ResultClassName
+            };
+        }
 
         #region Public Methods
         public void AttachEvents()
