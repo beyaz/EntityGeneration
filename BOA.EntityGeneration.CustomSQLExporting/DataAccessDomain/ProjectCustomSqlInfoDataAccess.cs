@@ -260,9 +260,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
 
             return list.ToList().ConvertAll(x =>
             {
-                var name       = x.name;
-                var dataType   = x.dataType;
-                var isNullable = x.isNullable;
+                var name       = x.Name;
+                var dataType   = x.DataType;
+                var isNullable = x.IsNullable;
 
                 var cSharpPropertyTypeName = GetDataTypeInDotnet(dataType, isNullable);
 

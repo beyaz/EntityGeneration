@@ -44,8 +44,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
         {
             var query = $@"
 SELECT parameterid AS [Name],
-       datatype,
-       CAST(nullableflag as BIT) as [isNullable]
+       datatype    AS [Datatype],
+       CAST(nullableflag as BIT) AS [IsNullable]
   from dbo.objectparameters WITH (NOLOCK) 
  WHERE profileid = @{nameof(ProfileId)}
   AND objectid   = @{nameof(ObjectId)}";
@@ -110,9 +110,9 @@ ORDER BY [Name]";
     internal class ObjectParameterInfo
     {
         #region Public Properties
-        public string dataType   { get; set; }
-        public bool   isNullable { get; set; }
-        public string name       { get; set; }
+        public string DataType   { get; set; }
+        public bool   IsNullable { get; set; }
+        public string Name       { get; set; }
         #endregion
     }
 
