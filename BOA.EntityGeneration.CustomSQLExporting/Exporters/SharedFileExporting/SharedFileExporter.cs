@@ -7,6 +7,10 @@ using DotNetStringUtilities;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
 {
+    class SharedClassWriter
+    {
+        //public PaddedStringBuilder sb { get; set; }
+    }
     class SharedFileExporter : ContextContainer
     {
         #region Static Fields
@@ -14,7 +18,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
         #endregion
 
         #region Fields
-        readonly PaddedStringBuilder sb = new PaddedStringBuilder();
+        readonly PaddedStringBuilder Output = new PaddedStringBuilder();
         #endregion
 
         #region Public Methods
@@ -40,58 +44,58 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
         #region Methods
         void BeginClass()
         {
-            sb.AppendLine($"public static class {NamingMap.RepositoryClassName}");
-            sb.OpenBracket();
+            Output.AppendLine($"public static class {NamingMap.RepositoryClassName}");
+            Output.OpenBracket();
         }
 
         void BeginNamespace()
         {
-            sb.AppendLine($"namespace {NamingMap.RepositoryNamespace}.Shared");
-            sb.OpenBracket();
+            Output.AppendLine($"namespace {NamingMap.RepositoryNamespace}.Shared");
+            Output.OpenBracket();
         }
 
         void CreateSqlInfo()
         {
-            sb.AppendLine($"public static SqlInfo CreateSqlInfo({NamingMap.InputClassName} request)");
-            sb.AppendLine("{");
-            sb.PaddingCount++;
+            Output.AppendLine($"public static SqlInfo CreateSqlInfo({NamingMap.InputClassName} request)");
+            Output.AppendLine("{");
+            Output.PaddingCount++;
 
-            sb.AppendLine("const string sql = @\"");
-            sb.AppendAll(CustomSqlInfo.Sql);
-            sb.AppendLine();
-            sb.AppendLine("\";");
-            sb.AppendLine();
-            sb.AppendLine("var sqlInfo = new SqlInfo { CommandText = sql };");
+            Output.AppendLine("const string sql = @\"");
+            Output.AppendAll(CustomSqlInfo.Sql);
+            Output.AppendLine();
+            Output.AppendLine("\";");
+            Output.AppendLine();
+            Output.AppendLine("var sqlInfo = new SqlInfo { CommandText = sql };");
 
             if (CustomSqlInfo.Parameters.Any())
             {
-                sb.AppendLine();
+                Output.AppendLine();
                 foreach (var item in CustomSqlInfo.Parameters)
                 {
-                    sb.AppendLine($"sqlInfo.AddInParameter(\"@{item.Name}\", SqlDbType.{item.SqlDbTypeName}, request.{item.ValueAccessPathForAddInParameter});");
+                    Output.AppendLine($"sqlInfo.AddInParameter(\"@{item.Name}\", SqlDbType.{item.SqlDbTypeName}, request.{item.ValueAccessPathForAddInParameter});");
                 }
             }
 
-            sb.AppendLine();
-            sb.AppendLine("return sqlInfo;");
+            Output.AppendLine();
+            Output.AppendLine("return sqlInfo;");
 
-            sb.PaddingCount--;
-            sb.AppendLine("}");
+            Output.PaddingCount--;
+            Output.AppendLine("}");
         }
 
         void EmptyLine()
         {
-            sb.AppendLine();
+            Output.AppendLine();
         }
 
         void EndClass()
         {
-            sb.CloseBracket();
+            Output.CloseBracket();
         }
 
         void EndNamespace()
         {
-            sb.CloseBracket();
+            Output.CloseBracket();
         }
 
         void ExportFileToDirectory()
@@ -102,13 +106,13 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
 
             Context.RepositoryProjectSourceFileNames.Add(Path.GetFileName(filePath));
 
-            FileSystem.WriteAllText(filePath, sb.ToString());
+            FileSystem.WriteAllText(filePath, Output.ToString());
         }
 
         void WriteEmbeddedClasses()
         {
-            sb.AppendAll(Config.EmbeddedCodes);
-            sb.AppendLine();
+            Output.AppendAll(Config.EmbeddedCodes);
+            Output.AppendLine();
         }
 
         void WriteReadContract()
@@ -118,11 +122,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
                 return;
             }
 
-            sb.AppendLine("/// <summary>");
-            sb.AppendLine($"///{Padding.ForComment}Maps reader columns to contract for '{CustomSqlInfo.Name}' sql.");
-            sb.AppendLine("/// </summary>");
-            sb.AppendLine($"public static void ReadContract(IDataReader reader, {NamingMap.ResultClassName} contract)");
-            sb.OpenBracket();
+            Output.AppendLine("/// <summary>");
+            Output.AppendLine($"///{Padding.ForComment}Maps reader columns to contract for '{CustomSqlInfo.Name}' sql.");
+            Output.AppendLine("/// </summary>");
+            Output.AppendLine($"public static void ReadContract(IDataReader reader, {NamingMap.ResultClassName} contract)");
+            Output.OpenBracket();
 
             foreach (var item in CustomSqlInfo.ResultColumns)
             {
@@ -131,8 +135,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
                     Context.RepositoryAssemblyReferences.Add(ReferencedEntityTypeNamingPattern.ReferencedRepositoryAssemblyPath);
                     Context.RepositoryAssemblyReferences.Add(ReferencedEntityTypeNamingPattern.ReferencedEntityAssemblyPath);
 
-                    sb.AppendLine($"contract.{item.NameInDotnet} = new {ReferencedEntityTypeNamingPattern.ReferencedEntityAccessPath}();");
-                    sb.AppendLine($"{ReferencedEntityTypeNamingPattern.ReferencedEntityReaderMethodPath}(reader, contract.{item.NameInDotnet});");
+                    Output.AppendLine($"contract.{item.NameInDotnet} = new {ReferencedEntityTypeNamingPattern.ReferencedEntityAccessPath}();");
+                    Output.AppendLine($"{ReferencedEntityTypeNamingPattern.ReferencedEntityReaderMethodPath}(reader, contract.{item.NameInDotnet});");
                     continue;
                 }
 
@@ -142,19 +146,19 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
                     readerMethodName = "GetGuidValue";
                 }
 
-                sb.AppendLine($"contract.{item.NameInDotnet} = reader.{readerMethodName}(\"{item.Name}\");");
+                Output.AppendLine($"contract.{item.NameInDotnet} = reader.{readerMethodName}(\"{item.Name}\");");
             }
 
-            sb.CloseBracket();
+            Output.CloseBracket();
         }
 
         void WriteUsingList()
         {
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Data;");
-            sb.AppendLine("using System.Data.SqlClient;");
-            sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine($"using {NamingMap.EntityNamespace};");
+            Output.AppendLine("using System;");
+            Output.AppendLine("using System.Data;");
+            Output.AppendLine("using System.Data.SqlClient;");
+            Output.AppendLine("using System.Collections.Generic;");
+            Output.AppendLine($"using {NamingMap.EntityNamespace};");
         }
         #endregion
     }
