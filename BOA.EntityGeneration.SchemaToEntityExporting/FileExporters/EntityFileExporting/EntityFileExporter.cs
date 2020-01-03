@@ -1,4 +1,7 @@
 ﻿using System.IO;
+using BOA.EntityGeneration.DbModel.Interfaces;
+using BOA.EntityGeneration.EntityClassWriting;
+using BOA.EntityGeneration.ScriptModel;
 using BOA.EntityGeneration.ScriptModel.Creators;
 using DotNetStringUtilities;
 
@@ -79,6 +82,12 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.EntityFileE
 
         void WriteClass()
         {
+            var entityClass = new EntityClass
+            {
+
+            };
+            entityClass.Write(file);
+
             ContractCommentInfoCreator.Write(file, TableInfo);
 
             var inheritancePart = string.Empty;
@@ -114,4 +123,15 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.EntityFileE
         }
         #endregion
     }
+
+    class EntityClass
+    {
+        public void Write(PaddedStringBuilder file)
+        {
+
+        }
+
+        
+    }
+
 }

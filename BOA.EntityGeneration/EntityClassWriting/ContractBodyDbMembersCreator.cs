@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using BOA.EntityGeneration.DbModel;
 using BOA.EntityGeneration.DbModel.Interfaces;
+using BOA.EntityGeneration.ScriptModel;
 using DotNetStringUtilities;
 
-namespace BOA.EntityGeneration.ScriptModel.Creators
+namespace BOA.EntityGeneration.EntityClassWriting
 {
     class ContractDbMemberWriter
     {
@@ -49,44 +50,13 @@ namespace BOA.EntityGeneration.ScriptModel.Creators
         #endregion
     }
 
-    /// <summary>
-    ///     The contract body database members creator
-    /// </summary>
-    public class ContractBodyDbMembersCreator
+    class ContractDbMemberWriterMapper
     {
-        #region Properties
-        /// <summary>
-        ///     Gets the padding for comment.
-        /// </summary>
-        static string PaddingForComment => "     ";
-        #endregion
-
-        #region Public Methods
-        /// <summary>
-        ///     Creates the specified table information.
-        /// </summary>
-        public static ContractBodyDbMembers Create(ITableInfo TableInfo)
+        public static IReadOnlyList<ContractDbMemberWriter> Map(ITableInfo tableInfo)
         {
-            var sb = new StringBuilder();
-
-            sb.AppendLine("#region Database Columns");
-
-            foreach (var member in GetMembers(TableInfo))
-            {
-                sb.AppendLine();
-                member.Write(sb);
-            }
-
-            
-
-            sb.AppendLine();
-            sb.AppendLine("#endregion");
-
-            return new ContractBodyDbMembers {PropertyDefinitions = sb.ToString()};
+            return tableInfo.Columns.Select(info => CreateContractDbMemberWriter(tableInfo, info)).ToList();
         }
-        #endregion
 
-        #region Methods
         static ContractDbMemberWriter CreateContractDbMemberWriter(ITableInfo tableInfo, IColumnInfo data)
         {
             var dotNetType = data.DotNetType;
@@ -131,13 +101,45 @@ namespace BOA.EntityGeneration.ScriptModel.Creators
 
             return extraComment;
         }
+    }
 
-        static IReadOnlyList<ContractDbMemberWriter> GetMembers(ITableInfo tableInfo)
+    /// <summary>
+    ///     The contract body database members creator
+    /// </summary>
+    public class ContractBodyDbMembersCreator
+    {
+        #region Properties
+        /// <summary>
+        ///     Gets the padding for comment.
+        /// </summary>
+        static string PaddingForComment => "     ";
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        ///     Creates the specified table information.
+        /// </summary>
+        public static ContractBodyDbMembers Create(ITableInfo TableInfo)
         {
-            return tableInfo.Columns.Select(info => CreateContractDbMemberWriter(tableInfo, info)).ToList();
+            var sb = new StringBuilder();
+
+            sb.AppendLine("#region Database Columns");
+
+            var members = ContractDbMemberWriterMapper.Map(TableInfo);
+
+            foreach (var member in members)
+            {
+                sb.AppendLine();
+                member.Write(sb);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("#endregion");
+
+            return new ContractBodyDbMembers {PropertyDefinitions = sb.ToString()};
         }
+        #endregion
 
         
-        #endregion
     }
 }

@@ -1,5 +1,9 @@
-﻿using BOA.EntityGeneration.DbModel.Interfaces;
+﻿using System.Linq;
+using BOA.EntityGeneration.DbModel.Interfaces;
+using BOA.EntityGeneration.EntityClassWriting;
 using DotNetStringUtilities;
+
+
 
 namespace BOA.EntityGeneration.ScriptModel.Creators
 {
@@ -20,15 +24,19 @@ namespace BOA.EntityGeneration.ScriptModel.Creators
 
         public static void Write(PaddedStringBuilder sb, ITableInfo tableInfo)
         {
-            sb.AppendLine("/// <summary>");
-            sb.AppendLine($"///{Padding.ForComment}Entity contract for table {tableInfo.SchemaName}.{tableInfo.TableName}");
+            Map(tableInfo).Write(sb);
+        }
+        #endregion
 
-            foreach (var indexInfo in tableInfo.IndexInfoList)
+        #region Methods
+        static EntityClassComment Map(ITableInfo source)
+        {
+            return new EntityClassComment
             {
-                sb.AppendLine($"///{Padding.ForComment}<para>{indexInfo}</para>");
-            }
-
-            sb.AppendLine("/// </summary>");
+                SchemaName    = source.SchemaName,
+                TableName     = source.TableName,
+                IndexInfoList = source.IndexInfoList.ToList().ConvertAll(x => x.ToString())
+            };
         }
         #endregion
     }

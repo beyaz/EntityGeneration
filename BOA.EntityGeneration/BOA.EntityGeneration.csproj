@@ -67,9 +67,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptModel\ContractBodyDbMembers.cs" />
     <Compile Include="ScriptModel\ContractCommentInfo.cs" />
-    <Compile Include="ScriptModel\Creators\ContractBodyDbMembersCreator.cs" />
+    <Compile Include="EntityClassWriting\ContractBodyDbMembersCreator.cs" />
     <Compile Include="ScriptModel\Creators\ContractCommentInfoCreator.cs" />
     <Compile Include="ScriptModel\Creators\DeleteInfoCreator.cs" />
+    <Compile Include="EntityClassWriting\EntityClassComment.cs" />
     <Compile Include="ScriptModel\Creators\InsertInfoCreator.cs" />
     <Compile Include="ScriptModel\Creators\SelectAllInfoCreator.cs" />
     <Compile Include="ScriptModel\Creators\SelectByIndexInfoCreator.cs" />
@@ -96,5 +97,6 @@
       <Version>1.0.0.1</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
