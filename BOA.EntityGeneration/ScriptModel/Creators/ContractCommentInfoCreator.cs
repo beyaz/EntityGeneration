@@ -3,8 +3,6 @@ using BOA.EntityGeneration.DbModel.Interfaces;
 using BOA.EntityGeneration.EntityClassWriting;
 using DotNetStringUtilities;
 
-
-
 namespace BOA.EntityGeneration.ScriptModel.Creators
 {
     public static class ContractCommentInfoCreator
@@ -24,12 +22,15 @@ namespace BOA.EntityGeneration.ScriptModel.Creators
 
         public static void Write(PaddedStringBuilder sb, ITableInfo tableInfo)
         {
-            Map(tableInfo).Write(sb);
+            EntityClassCommentMapper.CreateFrom(tableInfo).Write(sb);
         }
         #endregion
+    }
 
-        #region Methods
-        static EntityClassComment Map(ITableInfo source)
+    public class EntityClassCommentMapper
+    {
+        #region Public Methods
+        public static EntityClassComment CreateFrom(ITableInfo source)
         {
             return new EntityClassComment
             {

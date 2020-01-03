@@ -56,6 +56,8 @@
     <Compile Include="DbModel\Types\IndexInfo.cs" />
     <Compile Include="DbModel\Types\TableInfo.cs" />
     <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="EntityClassWriting\ContractPropertyInfoMapper.cs" />
+    <Compile Include="EntityClassWriting\EntityClass.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FileHelper.cs" />
     <Compile Include="FileSystem.cs" />
@@ -65,9 +67,8 @@
     <Compile Include="NamingMap.cs" />
     <Compile Include="ProcessContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScriptModel\ContractBodyDbMembers.cs" />
     <Compile Include="ScriptModel\ContractCommentInfo.cs" />
-    <Compile Include="EntityClassWriting\ContractBodyDbMembersCreator.cs" />
+    <Compile Include="EntityClassWriting\ContractPropertyInfo.cs" />
     <Compile Include="ScriptModel\Creators\ContractCommentInfoCreator.cs" />
     <Compile Include="ScriptModel\Creators\DeleteInfoCreator.cs" />
     <Compile Include="EntityClassWriting\EntityClassComment.cs" />

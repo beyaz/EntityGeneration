@@ -1,9 +1,8 @@
 ﻿using System.IO;
-using BOA.EntityGeneration.DbModel.Interfaces;
 using BOA.EntityGeneration.EntityClassWriting;
-using BOA.EntityGeneration.ScriptModel;
 using BOA.EntityGeneration.ScriptModel.Creators;
 using DotNetStringUtilities;
+
 
 namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.EntityFileExporting
 {
@@ -66,7 +65,6 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.EntityFileE
 
             Context.OnEntityFileContentCompleted(content);
 
-
             FileSystem.WriteAllText(filePath, content);
         }
 
@@ -84,34 +82,12 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.EntityFileE
         {
             var entityClass = new EntityClass
             {
-
+                EntityClassComment          = EntityClassCommentMapper.CreateFrom(TableInfo),
+                EntityContractBaseClassName = Config.EntityContractBase,
+                ClassName                   = ClassName,
+                PropertyList                = ContractPropertyInfoMapper.Map(TableInfo)
             };
             entityClass.Write(file);
-
-            ContractCommentInfoCreator.Write(file, TableInfo);
-
-            var inheritancePart = string.Empty;
-
-            if (Config.EntityContractBase != null)
-            {
-                inheritancePart = ": " + Config.EntityContractBase;
-            }
-
-            file.AppendLine("[Serializable]");
-            file.AppendLine($"public sealed class {ClassName} {inheritancePart}");
-            file.OpenBracket();
-
-            ContractCommentInfoCreator.Write(file, TableInfo);
-            file.AppendLine("// ReSharper disable once EmptyConstructor");
-            file.AppendLine($"public {TableInfo.TableName.ToContractName()}Contract()");
-            file.OpenBracket();
-            file.CloseBracket();
-            file.AppendLine();
-
-            file.AppendAll(ContractBodyDbMembersCreator.Create(TableInfo).PropertyDefinitions);
-            file.AppendLine();
-
-            file.CloseBracket(); // end of class
         }
 
         void WriteUsingList()
@@ -123,15 +99,4 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.EntityFileE
         }
         #endregion
     }
-
-    class EntityClass
-    {
-        public void Write(PaddedStringBuilder file)
-        {
-
-        }
-
-        
-    }
-
 }

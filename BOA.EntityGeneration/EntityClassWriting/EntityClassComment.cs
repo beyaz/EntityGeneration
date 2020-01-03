@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using BOA.EntityGeneration.ScriptModel;
 using DotNetStringUtilities;
 
 namespace BOA.EntityGeneration.EntityClassWriting
 {
-    class EntityClassComment
+    public class EntityClassComment
     {
         #region Public Properties
         public IReadOnlyList<string> IndexInfoList { get; set; }
@@ -15,12 +14,13 @@ namespace BOA.EntityGeneration.EntityClassWriting
         #region Public Methods
         public void Write(PaddedStringBuilder sb)
         {
+            const string Padding = "     ";
             sb.AppendLine("/// <summary>");
-            sb.AppendLine($"///{Padding.ForComment}Entity contract for table {SchemaName}.{TableName}");
+            sb.AppendLine($"///{Padding}Entity contract for table {SchemaName}.{TableName}");
 
             foreach (var indexInfo in IndexInfoList)
             {
-                sb.AppendLine($"///{Padding.ForComment}<para>{indexInfo}</para>");
+                sb.AppendLine($"///{Padding}<para>{indexInfo}</para>");
             }
 
             sb.AppendLine("/// </summary>");
