@@ -70,13 +70,14 @@ namespace BOA.EntityGeneration.ScriptModel.Creators
             var sb = new StringBuilder();
 
             sb.AppendLine("#region Database Columns");
-            foreach (var columnInfo in TableInfo.Columns)
-            {
-                var extraComment = GetIndexComment(TableInfo, columnInfo);
 
+            foreach (var member in GetMembers(TableInfo))
+            {
                 sb.AppendLine();
-                Write(sb, columnInfo, extraComment);
+                member.Write(sb);
             }
+
+            
 
             sb.AppendLine();
             sb.AppendLine("#endregion");
@@ -136,54 +137,7 @@ namespace BOA.EntityGeneration.ScriptModel.Creators
             return tableInfo.Columns.Select(info => CreateContractDbMemberWriter(tableInfo, info)).ToList();
         }
 
-        /// <summary>
-        ///     Writes the specified sb.
-        /// </summary>
-        static void Write(StringBuilder sb, IColumnInfo data, string extraComment)
-        {
-            var comment = data.Comment;
-
-            var commentList = new List<string>();
-
-            if (comment.HasValue())
-            {
-                commentList.AddRange(comment.Split(Environment.NewLine.ToCharArray()));
-            }
-
-            if (extraComment.HasValue())
-            {
-                commentList.Add(extraComment);
-            }
-
-            if (commentList.Any())
-            {
-                sb.AppendLine("/// <summary>");
-
-                var isFirstComment = true;
-                foreach (var item in commentList)
-                {
-                    if (isFirstComment)
-                    {
-                        isFirstComment = false;
-                        sb.AppendLine("///" + PaddingForComment + "" + item);
-                    }
-                    else
-                    {
-                        sb.AppendLine("///" + PaddingForComment + "<para> " + item + " </para>");
-                    }
-                }
-
-                sb.AppendLine(@"/// </summary>");
-            }
-
-            var dotNetType = data.DotNetType;
-            if (data.ColumnName == Names2.VALID_FLAG)
-            {
-                dotNetType = DotNetTypeName.DotNetBool;
-            }
-
-            sb.AppendLine("public " + dotNetType + " " + data.ColumnName.ToContractName() + " { get; set; }");
-        }
+        
         #endregion
     }
 }
