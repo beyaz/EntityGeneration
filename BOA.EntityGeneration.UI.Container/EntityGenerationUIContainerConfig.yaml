@@ -27,6 +27,7 @@ ProfileNames:
   - CreditCardTransaction
   - CreditCardLimit
   - EMB_BATCH
+  - CRD_BATCH
   - '*'
 SchemaNames:
   - BKM

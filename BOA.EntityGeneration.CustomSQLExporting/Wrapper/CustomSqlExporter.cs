@@ -34,6 +34,12 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 profileId = "EmbossingBatch";
             }
 
+            if (profileId == "CRD_BATCH")
+            {
+                profileId = "CreditCardBatch";
+            }
+            
+
             Context.ProfileName = profileId;
 
             // initialize Naming Map
@@ -55,7 +61,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                 "CreditCardStatementBatch",
                 "CreditCardTransaction",
                 "EmbossingBatch",
-                "CreditCardLimit"
+                "CreditCardLimit",
+                "CreditCardBatch"
             };
 
             if (newNaming.Contains(profileId))
