@@ -79,9 +79,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.AllInOneClassReposit
 
         void UsingList()
         {
-            foreach (var line in Config.UsingLines)
+            foreach (var line in Config.UsingLines.Select(Resolve))
             {
-                file.AppendLine(Resolve(line));
+                file.AppendLine(line);
             }
         }
 
