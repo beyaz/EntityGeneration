@@ -36,7 +36,8 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
             {
                 Connection = databaseReader.Connection,
                 ProfileId  = databaseReader.ProfileId,
-                ObjectId   = databaseReader.ObjectId
+                ObjectId   = databaseReader.ObjectId,
+                DatabaseReader = databaseReader
             };
 
             access.GetCustomSqlInfo().Should().NotBeNull();

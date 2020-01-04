@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using BOA.EntityGeneration.CustomSQLExporting.ContextManagement;
 using BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain;
+using BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain;
 using BOA.EntityGeneration.CustomSQLExporting.Exporters.AllInOneClassRepositoryExporting;
 using BOA.EntityGeneration.CustomSQLExporting.Exporters.BoaRepositoryExporting;
 using BOA.EntityGeneration.CustomSQLExporting.Exporters.CsprojEntityExporting;
@@ -101,7 +102,13 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Wrapper
                     ProfileId       = Context.Input.ProfileId,
                     Connection      = Context.Connection,
                     ObjectId        = objectId,
-                    SwitchCaseIndex = switchCaseIndex++
+                    SwitchCaseIndex = switchCaseIndex++,
+                    DatabaseReader = new DatabaseReader
+                    {
+                        Connection = Context.Connection,
+                        ProfileId  = Context.Input.ProfileId,
+                        ObjectId   = objectId
+                    }
                 };
 
                 Context.CustomSqlInfo = projectCustomSqlInfoDataAccess.GetCustomSqlInfo();

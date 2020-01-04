@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain;
 using BOA.EntityGeneration.CustomSQLExporting.Models;
 using BOA.EntityGeneration.DbModel;
 using DotNetStringUtilities;
+using CustomSqlInfo = BOA.EntityGeneration.CustomSQLExporting.Models.CustomSqlInfo;
+using CustomSqlInfoResult = BOA.EntityGeneration.CustomSQLExporting.Models.CustomSqlInfoResult;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
 {
@@ -18,18 +21,21 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
         public string        ObjectId        { get; set; }
         public string        ProfileId       { get; set; }
         public int           SwitchCaseIndex { get; set; }
+        public DatabaseReader DatabaseReader { get; set; }
         #endregion
+
+        
 
         #region Public Methods
         public CustomSqlInfo GetCustomSqlInfo()
         {
-            var databaseReader = this.CreateDatabaseReader();
+           
 
-            var customSqlInfo = databaseReader.ReadCustomSqlInfo().ToCustomSqlInfo();
+            var customSqlInfo = DatabaseReader.ReadCustomSqlInfo().ToCustomSqlInfo();
 
             customSqlInfo.Parameters = ReadInputParameters();
 
-            customSqlInfo.ResultColumns = databaseReader.ReadResultColumns().Select(Mapper.ToCustomSqlInfoResult).ToList();
+            customSqlInfo.ResultColumns = DatabaseReader.ReadResultColumns().Select(Mapper.ToCustomSqlInfoResult).ToList();
 
             if (customSqlInfo.ResultColumns.Any(item => item.IsReferenceToEntity) &&
                 customSqlInfo.ResultColumns.Count == 1)
@@ -256,7 +262,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
         /// </summary>
         IReadOnlyList<CustomSqlInfoParameter> ReadInputParameters()
         {
-            var list = this.CreateDatabaseReader().ReadInputParametersFromDatabase();
+            var list = DatabaseReader.ReadInputParametersFromDatabase();
 
             return list.ToList().ConvertAll(x =>
             {

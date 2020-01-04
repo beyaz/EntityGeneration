@@ -6,7 +6,7 @@ using Dapper;
 
 namespace BOA.EntityGeneration.CustomSQLExporting.DatabaseAccessDomain
 {
-    class DatabaseReader
+    public class DatabaseReader
     {
         #region Public Properties
         public IDbConnection Connection { get; set; }
@@ -107,7 +107,7 @@ ORDER BY [Name]";
     }
 
     [Serializable]
-    internal class ObjectParameterInfo
+    public class ObjectParameterInfo
     {
         #region Public Properties
         public string DataType   { get; set; }
