@@ -95,7 +95,10 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.AllInOneClassReposit
 
             var sharedRepositoryClassAccessPath = Resolve(Config.SharedRepositoryClassAccessPath);
 
+            var inputClassName = NamingMap.InputClassName;
+
             var resultContractName     = NamingMap.ResultClassName;
+
             var readContractMethodPath = $"{sharedRepositoryClassAccessPath}.ReadContract";
 
             if (CustomSqlInfo.ResultContractIsReferencedToEntity)
@@ -107,18 +110,20 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.AllInOneClassReposit
                 Context.RepositoryAssemblyReferences.Add(ReferencedEntityTypeNamingPattern.ReferencedRepositoryAssemblyPath);
             }
 
+            
+
             if (CustomSqlInfo.SqlResultIsCollection)
             {
                 if (hasZeroInput)
                 {
-                    file.AppendLine($"public List<{resultContractName}> {methodName}({NamingMap.InputClassName} request = null)");
+                    file.AppendLine($"public List<{resultContractName}> {methodName}({inputClassName} request = null)");
                     file.OpenBracket();
-                    file.AppendLine($"request = request ?? new {NamingMap.InputClassName}();");
+                    file.AppendLine($"request = request ?? new {inputClassName}();");
                     file.AppendLine();
                 }
                 else
                 {
-                    file.AppendLine($"public List<{resultContractName}> {methodName}({NamingMap.InputClassName} request)");
+                    file.AppendLine($"public List<{resultContractName}> {methodName}({inputClassName} request)");
                     file.OpenBracket();
                 }
                 file.AppendLine($"const string CallerMemberPath = \"{key}\";");
@@ -132,14 +137,14 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.AllInOneClassReposit
             {
                 if (hasZeroInput)
                 {
-                    file.AppendLine($"public {resultContractName} {methodName}({NamingMap.InputClassName} request)");
+                    file.AppendLine($"public {resultContractName} {methodName}({inputClassName} request)");
                     file.OpenBracket();
-                    file.AppendLine($"request = request ?? new {NamingMap.InputClassName}();");
+                    file.AppendLine($"request = request ?? new {inputClassName}();");
                     file.AppendLine();
                 }
                 else
                 {
-                    file.AppendLine($"public {resultContractName} {methodName}({NamingMap.InputClassName} request)");
+                    file.AppendLine($"public {resultContractName} {methodName}({inputClassName} request)");
                     file.OpenBracket();
                 }
 
