@@ -39,6 +39,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Models
         ///     Gets or sets the value access path for add in parameter.
         /// </summary>
         public string ValueAccessPathForAddInParameter { get; set; }
+
+        public bool IsStructured { get; set; }
+        public string StructuredTypeName { get; set; }
         #endregion
     }
 }

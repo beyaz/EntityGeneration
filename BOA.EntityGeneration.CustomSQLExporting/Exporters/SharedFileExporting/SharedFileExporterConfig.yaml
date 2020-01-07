@@ -39,6 +39,22 @@ EmbeddedCodes: |
     
     	parameters.Add(parameter);
     }
+
+    /// <summary>
+    ///    Adds the in structured parameter.
+    /// </summary>
+    public void AddInStructuredParameter(string parameterName, string typeName, object value)
+    {
+        var parameter = new SqlParameter
+        {
+            ParameterName = parameterName,
+            SqlDbType     = SqlDbType.Structured,
+            Value         = value,
+            TypeName      = typeName
+        };
+        
+        parameters.Add(parameter);
+    }
     #endregion
   }
   

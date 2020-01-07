@@ -124,6 +124,11 @@ namespace BOA.EntityGeneration.CustomSQLExporting.Exporters.SharedFileExporting
                 Output.AppendLine();
                 foreach (var item in CustomSqlInfo.Parameters)
                 {
+                    if (item.IsStructured)
+                    {
+                        Output.AppendLine($"sqlInfo.AddInStructuredParameter(\"@{item.Name}\", \"{item.StructuredTypeName}\", request.{item.ValueAccessPathForAddInParameter});");
+                        continue;
+                    }
                     Output.AppendLine($"sqlInfo.AddInParameter(\"@{item.Name}\", SqlDbType.{item.SqlDbTypeName}, request.{item.ValueAccessPathForAddInParameter});");
                 }
             }

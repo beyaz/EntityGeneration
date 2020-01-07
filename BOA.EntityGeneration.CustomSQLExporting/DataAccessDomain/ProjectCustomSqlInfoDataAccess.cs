@@ -189,6 +189,15 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
                 return DotNetTypeName.DotNetTimeSpan + suffix;
             }
 
+            var config = Config.FirstOrDefault(x => dataType.Equals(x.DataType, StringComparison.OrdinalIgnoreCase));
+            if (config!=null)
+            {
+                return config.DotNetTypeName;
+            }
+
+
+            
+
             throw new NotImplementedException(dataType);
         }
 
@@ -254,8 +263,31 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
                 return SqlDbType.Char;
             }
 
+            var config = Config.FirstOrDefault(x => dataType.Equals(x.DataType, StringComparison.OrdinalIgnoreCase));
+            if (config!=null)
+            {
+                return config.SqlDbType;
+            }
+
             throw new NotImplementedException(dataType);
         }
+
+        class ParameterConfig
+        {
+            public string DataType { get; set; }
+            public SqlDbType SqlDbType { get; set; }
+            public string DotNetTypeName { get; set; }
+        }
+
+        static readonly IReadOnlyList<ParameterConfig> Config = new List<ParameterConfig>
+        {
+            new ParameterConfig{ DataType = "COR.TpIntTable",       SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<int>"},
+            new ParameterConfig{ DataType = "COR.TpVarchar10Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},
+            new ParameterConfig{ DataType = "COR.TpVarchar20Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},
+            new ParameterConfig{ DataType = "COR.TpVarchar30Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},
+            new ParameterConfig{ DataType = "COR.TpVarchar40Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},
+            new ParameterConfig{ DataType = "COR.TpVarchar50Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"}
+        };
 
         /// <summary>
         ///     Reads the input parameters.
@@ -302,7 +334,9 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
                     CSharpPropertyName               = cSharpPropertyName,
                     CSharpPropertyTypeName           = cSharpPropertyTypeName,
                     SqlDbTypeName                    = sqlDbTypeName,
-                    ValueAccessPathForAddInParameter = valueAccessPathForAddInParameter
+                    ValueAccessPathForAddInParameter = valueAccessPathForAddInParameter,
+                    IsStructured = sqlDbTypeName ==SqlDbType.Structured,
+                    StructuredTypeName = x.DataType
                 };
             });
         }

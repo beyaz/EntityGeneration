@@ -14,6 +14,41 @@ namespace BOA.EntityGeneration.CustomSQLExporting
     public class CustomSqlExporterTest
     {
         #region Public Methods
+        
+        [TestMethod]
+        public void When_input_parameter_is_table_variable_then_should_generate_list_property()
+        {
+            var inputParameters = new List<ObjectParameterInfo>
+            {
+                new ObjectParameterInfo
+                {
+                    IsNullable = true,
+                    DataType   = "bigint",
+                    Name       = "aloha"
+                },
+                new ObjectParameterInfo
+                {
+                    IsNullable = true,
+                    DataType   = "COR.TpIntTable",
+                    Name       = "IdList"
+                }
+            };
+
+            var resultColumns = new List<CustomSqlInfoResult>
+            {
+                new CustomSqlInfoResult
+                {
+                    Name     = "y",
+                    DataType = "int"
+                }
+            };
+
+            var generatedFiles = Generate(inputParameters, resultColumns);
+
+            generatedFiles.TypeCodes.Should().Contain("public List<int> IdList { get; set; }");
+            generatedFiles.SharedCodes.Should().Contain(@"sqlInfo.AddInStructuredParameter(""@IdList"", ""COR.TpIntTable"", request.IdList);");
+        }
+
         [TestMethod]
         public void When_input_parameter_ends_with_FLAG_and_value_type_is_char_one_it_should_generate_dot_net_boolean_property()
         {
