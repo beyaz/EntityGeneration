@@ -105,24 +105,35 @@ EmbeddedCodes: |
                   
                   currentParameter.TypeName = parameter.TypeName;
                   
-                  if (currentParameter.Value is List<int> intList)
-                  {
-                      currentParameter.Value = dbLayer.GetInt32TableFromList(intList);
-                  }
-                  else if (currentParameter.Value is List<string> stringList)
-                  {
-                      currentParameter.Value = dbLayer.GetStringTableFromList(stringList);
-                  }
-                  else if (currentParameter.Value is List<long> longList)
-                  {
-                      currentParameter.Value = dbLayer.GetInt64TableFromList(longList);
-                  }
-                  else
-                  {
-                      throw new NotImplementedException(currentParameter.Value?.GetType().ToString());
-                  }
+                  UpdateStructuredValue(currentParameter, dbLayer);
               }
           }
+      }
+
+      static void UpdateStructuredValue(IDataParameter currentParameter, SQLDBLayer dbLayer)
+      {
+          var intList = currentParameter.Value as List<int>;
+          if (intList != null)
+          {
+              currentParameter.Value = dbLayer.GetInt32TableFromList(intList);
+              return;
+          }
+          
+          var stringList = currentParameter.Value as List<string>;
+          if (stringList != null)
+          {
+               currentParameter.Value = dbLayer.GetStringTableFromList(stringList);
+               return;
+          }
+          
+          var longList = currentParameter.Value as List<long>;
+          if (longList != null)
+          {
+              currentParameter.Value = dbLayer.GetInt64TableFromList(longList);
+              return;
+          }
+                  
+          throw new NotImplementedException(currentParameter.Value?.GetType().ToString());
       }
   
       /// <summary>
