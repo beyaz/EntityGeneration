@@ -282,6 +282,7 @@ namespace BOA.EntityGeneration.CustomSQLExporting.DataAccessDomain
         static readonly IReadOnlyList<ParameterConfig> Config = new List<ParameterConfig>
         {
             new ParameterConfig{ DataType = "COR.TpIntTable",       SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<int>"},
+            new ParameterConfig{ DataType = "COR.TpBigIntTable",       SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<long>"},
             new ParameterConfig{ DataType = "COR.TpVarchar10Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},
             new ParameterConfig{ DataType = "COR.TpVarchar20Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},
             new ParameterConfig{ DataType = "COR.TpVarchar30Table", SqlDbType = SqlDbType.Structured, DotNetTypeName = "List<string>"},

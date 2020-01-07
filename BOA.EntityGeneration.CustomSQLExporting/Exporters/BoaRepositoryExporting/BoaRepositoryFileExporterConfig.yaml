@@ -93,11 +93,35 @@ EmbeddedCodes: |
       /// </summary>
       static void AddParameters(ObjectHelper objectHelper, SqlCommand command, SqlInfo sqlInfo)
       {
+          var dbLayer = objectHelper.DBLayer;
+          
           foreach (var parameter in sqlInfo.Parameters)
           {
-              var dbLayer = objectHelper.DBLayer;
-  
               dbLayer.AddInParameter(command, parameter.ParameterName, parameter.SqlDbType, parameter.Value);
+              
+              if (parameter.SqlDbType == SqlDbType.Structured)
+              {
+                  var currentParameter = command.Parameters[command.Parameters.Count - 1];
+                  
+                  currentParameter.TypeName = parameter.TypeName;
+                  
+                  if (currentParameter.Value is List<int> intList)
+                  {
+                      currentParameter.Value = dbLayer.GetInt32TableFromList(intList);
+                  }
+                  else if (currentParameter.Value is List<string> stringList)
+                  {
+                      currentParameter.Value = dbLayer.GetStringTableFromList(stringList);
+                  }
+                  else if (currentParameter.Value is List<long> longList)
+                  {
+                      currentParameter.Value = dbLayer.GetInt64TableFromList(longList);
+                  }
+                  else
+                  {
+                      throw new NotImplementedException(currentParameter.Value?.GetType().ToString());
+                  }
+              }
           }
       }
   
