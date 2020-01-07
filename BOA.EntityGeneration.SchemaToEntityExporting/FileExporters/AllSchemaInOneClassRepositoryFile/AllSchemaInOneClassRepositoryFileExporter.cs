@@ -133,6 +133,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.AllSchemaIn
             WriteInsertMethod();
             WriteBulkInsertMethod();
             WriteSelectAllByValidFlagMethod();
+            WriteSelectAllMethod();
         }
 
         void WriteSelectAllByValidFlagMethod()
@@ -156,6 +157,30 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting.FileExporters.AllSchemaIn
             file.OpenBracket();
 
             file.AppendLine($"var sqlInfo = {sharedRepositoryClassAccessPath}.SelectByValidFlag();");
+            file.AppendLine();
+            file.AppendLine($"const string CallerMemberPath = \"{callerMemberPath}\";");
+            file.AppendLine();
+            file.AppendLine($"return unitOfWork.ExecuteReaderToList<{typeContractName}>(CallerMemberPath, sqlInfo, {sharedRepositoryClassAccessPath}.ReadContract);");
+
+            file.CloseBracket();
+        }
+
+        void WriteSelectAllMethod()
+        {
+            var methodName = $"Get{CamelCasedTableName}";
+
+            var typeContractName = TableEntityClassNameForMethodParametersInRepositoryFiles;
+
+            var callerMemberPath = $"{FullClassName}.{methodName}";
+
+            file.AppendLine();
+            file.AppendLine("/// <summary>");
+            file.AppendLine($"///{Padding.ForComment} Selects all records in table {TableInfo.SchemaName}{TableInfo.TableName}.");
+            file.AppendLine("/// </summary>");
+            file.AppendLine($"public List<{typeContractName}> {methodName}()");
+            file.OpenBracket();
+
+            file.AppendLine($"var sqlInfo = {sharedRepositoryClassAccessPath}.Select();");
             file.AppendLine();
             file.AppendLine($"const string CallerMemberPath = \"{callerMemberPath}\";");
             file.AppendLine();
