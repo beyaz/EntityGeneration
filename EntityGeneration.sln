@@ -76,4 +76,40 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15A708D2-3934-499F-B07F-4ADB7D716E28}
 	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 11
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://srvtfs:8080/tfs/kt
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = BOA.EntityGeneration.ConstantsProjectGeneration.Test\\BOA.EntityGeneration.ConstantsProjectGeneration.Test.csproj
+		SccProjectName1 = BOA.EntityGeneration.ConstantsProjectGeneration.Test
+		SccLocalPath1 = BOA.EntityGeneration.ConstantsProjectGeneration.Test
+		SccProjectUniqueName2 = BOA.EntityGeneration.ConstantsProjectGeneration\\BOA.EntityGeneration.ConstantsProjectGeneration.csproj
+		SccProjectName2 = BOA.EntityGeneration.ConstantsProjectGeneration
+		SccLocalPath2 = BOA.EntityGeneration.ConstantsProjectGeneration
+		SccProjectUniqueName3 = BOA.EntityGeneration.CustomSQLExporting.Test\\BOA.EntityGeneration.CustomSQLExporting.Test.csproj
+		SccProjectName3 = BOA.EntityGeneration.CustomSQLExporting.Test
+		SccLocalPath3 = BOA.EntityGeneration.CustomSQLExporting.Test
+		SccProjectUniqueName4 = BOA.EntityGeneration.CustomSQLExporting\\BOA.EntityGeneration.CustomSQLExporting.csproj
+		SccProjectName4 = BOA.EntityGeneration.CustomSQLExporting
+		SccLocalPath4 = BOA.EntityGeneration.CustomSQLExporting
+		SccProjectUniqueName5 = BOA.EntityGeneration.SchemaToEntityExporting.Test\\BOA.EntityGeneration.SchemaToEntityExporting.Test.csproj
+		SccProjectName5 = BOA.EntityGeneration.SchemaToEntityExporting.Test
+		SccLocalPath5 = BOA.EntityGeneration.SchemaToEntityExporting.Test
+		SccProjectUniqueName6 = BOA.EntityGeneration.SchemaToEntityExporting\\BOA.EntityGeneration.SchemaToEntityExporting.csproj
+		SccProjectName6 = BOA.EntityGeneration.SchemaToEntityExporting
+		SccLocalPath6 = BOA.EntityGeneration.SchemaToEntityExporting
+		SccProjectUniqueName7 = BOA.EntityGeneration.UI.Container.Bootstrapper\\BOA.EntityGeneration.UI.Container.Bootstrapper.csproj
+		SccProjectName7 = BOA.EntityGeneration.UI.Container.Bootstrapper
+		SccLocalPath7 = BOA.EntityGeneration.UI.Container.Bootstrapper
+		SccProjectUniqueName8 = BOA.EntityGeneration.UI.Container.Build\\BOA.EntityGeneration.UI.Container.Build.csproj
+		SccProjectName8 = BOA.EntityGeneration.UI.Container.Build
+		SccLocalPath8 = BOA.EntityGeneration.UI.Container.Build
+		SccProjectUniqueName9 = BOA.EntityGeneration.UI.Container\\BOA.EntityGeneration.UI.Container.csproj
+		SccProjectName9 = BOA.EntityGeneration.UI.Container
+		SccLocalPath9 = BOA.EntityGeneration.UI.Container
+		SccProjectUniqueName10 = BOA.EntityGeneration\\BOA.EntityGeneration.csproj
+		SccProjectName10 = BOA.EntityGeneration
+		SccLocalPath10 = BOA.EntityGeneration
+	EndGlobalSection
 EndGlobal
