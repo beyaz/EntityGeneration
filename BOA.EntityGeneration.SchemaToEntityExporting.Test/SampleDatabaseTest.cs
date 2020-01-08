@@ -68,7 +68,7 @@ namespace BOA.EntityGeneration.SchemaToEntityExporting
             
 
 
-            ConfigurationHelper.ConfigurationDirectoryPath = "SampleDatabaseSchemaToEntityExportingConfigs";
+            ConfigurationHelper.ConfigurationDirectoryPath = "Configs";
 
             var schemaExporter = new SchemaExporter();
 

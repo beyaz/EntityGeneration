@@ -58,22 +58,22 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SampleDatabaseSchemaToEntityExportingConfigs\Exporters\SchemaExporterConfig.yaml">
+    <None Include="Configs\Exporters\SchemaExporterConfig.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="SampleDatabaseSchemaToEntityExportingConfigs\FileExporters\AllSchemaInOneClassRepositoryFile\AllSchemaInOneClassRepositoryFileExporterConfig.yaml">
+    <None Include="Configs\FileExporters\AllSchemaInOneClassRepositoryFile\AllSchemaInOneClassRepositoryFileExporterConfig.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="SampleDatabaseSchemaToEntityExportingConfigs\FileExporters\BankingRepositoryFileExporting\BoaRepositoryFileExporterConfig.yaml">
+    <None Include="Configs\FileExporters\BankingRepositoryFileExporting\BoaRepositoryFileExporterConfig.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="SampleDatabaseSchemaToEntityExportingConfigs\FileExporters\CsprojFileExporters\RepositoryCsprojFileExporterConfig.yaml">
+    <None Include="Configs\FileExporters\CsprojFileExporters\RepositoryCsprojFileExporterConfig.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="SampleDatabaseSchemaToEntityExportingConfigs\FileExporters\EntityFileExporting\EntityFileExporterConfig.yaml">
+    <None Include="Configs\FileExporters\EntityFileExporting\EntityFileExporterConfig.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="SampleDatabaseSchemaToEntityExportingConfigs\FileExporters\SharedFileExporting\SharedFileExporterConfig.yaml">
+    <None Include="Configs\FileExporters\SharedFileExporting\SharedFileExporterConfig.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="TestSolution.zip" />
