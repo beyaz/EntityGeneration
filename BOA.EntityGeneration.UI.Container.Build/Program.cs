@@ -7,6 +7,9 @@ using Ionic.Zip;
 
 namespace BOA.EntityGeneration.UI.Container.Build
 {
+    /// <summary>
+    /// 
+    /// </summary>
     class Program
     {
         #region Methods
